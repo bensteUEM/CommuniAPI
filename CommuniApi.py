@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import datetime
 
 import requests as requests
 
@@ -211,7 +212,7 @@ class CommuniApi:
 
         data = {
             "roleId": 40,
-            "createdOn": "2023-01-08T15:34:48+00:00", #TODO add datetime?
+            "createdOn": str(datetime.now()),
             "status": 2 if add_user else 4,
             "user": userId,
             "group": groupId,
