@@ -97,6 +97,66 @@ class CommuniApi:
             logging.debug("Creating group failed with {}".format(response.content))
             return False
 
+    def getGroups(self, **kwargs):
+        """
+        Get a list of groups matching either any or keyword specified criteria
+        :param kwargs:
+        :keyword id: get only group with matching id
+        :keyword name: get only group with matching name
+        :return:  list of groups or single group if filtered
+        """
+
+        url = self.rest_server + '/group'
+        params = {
+            'loadStatus': True,
+            'communiApp': self.communiAppId
+        }
+        if 'id' in kwargs.keys():
+            params['id'] = kwargs['id']
+
+        response = self.session.get(url=url, params=params)
+
+        if response.status_code == 200:
+            response_content = json.loads(response.content)
+            if len(response_content) == 0:
+                logging.debug("Response content empty - maybe group does not exist? {}?".format(kwargs))
+                return False
+            else:
+                logging.debug("Found {} groups - success".format(len(response_content)))
+
+                if 'name' in kwargs.keys():
+                    response_content = [item for item in response_content if item['title'] == kwargs['name']]
+                return response_content[0] if len(response_content) == 1 else response_content
+        else:
+            logging.debug("Requesting group failed with {}".format(response.content))
+            return False
+
+    def deleteGroup(self, **kwargs):
+        """
+        Delete a groups matching keyword specified criteria
+        :param kwargs: id = groupID (primary filter) OR name = groupName (without
+        :return: True if group does not exist at end of function
+        """
+        by_name = 'name' in kwargs.keys()
+
+        if not (by_name or 'id' in kwargs.keys()) and len(kwargs.keys() == 1):
+            logging.warning('Problem with keywords {} in deleteGroupd'.format(kwargs))
+        else:
+            id = kwargs['id'] if 'id' in kwargs.keys() else self.getGroups(name=kwargs['name'])['id']
+
+        url = self.rest_server + '/group/'+str(id)
+
+        response = self.session.delete(url)
+
+        if response.status_code == 200:
+            response_content = json.loads(response.content)
+            if len(response_content) == 0:
+                logging.debug("Deleted group{}?".format(id))
+                return True
+        else:
+            logging.debug("Deleting group failed with {}".format(response.content))
+            return False
+
 
 if __name__ == '__main__':
     api = CommuniApi()
