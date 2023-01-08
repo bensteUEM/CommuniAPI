@@ -26,12 +26,6 @@ class TestsCommuniApp(unittest.TestCase):
         result = self.api.getUserList()
         self.assertGreater(len(result), 0)
 
-    def test_createGroup(self):
-        result = self.api.createGroup(title="_TesCommuniApp",
-                                      description="Group used by Python Test Case for Automation",
-                                      access_type_open=False, hasGroupChat=True)
-        self.assertTrue(result)
-
     def test_getGroups(self):
         """
         IMPORTANT - This test method and the parameters used depend on the target system!
@@ -48,7 +42,7 @@ class TestsCommuniApp(unittest.TestCase):
         test_id = 7646
         self.assertEqual(result, test_id)
 
-    def test_deleteGroup(self):
+    def test_createDeleteGroup(self):
         """
         Test that creates two new groups and deletes them one by id and one by name
         IMPORTANT - This test method and the parameters used depend on the target system!
@@ -65,3 +59,46 @@ class TestsCommuniApp(unittest.TestCase):
 
         result2 = self.api.deleteGroup(name=group2['title'])
         self.assertTrue(result)
+
+    def test_userGroupList(self):
+        """
+        IMPORTANT - This test method and the parameters used depend on the target system!
+        :return:
+        """
+        userId = 28057
+        groupId = 21037
+
+        result = self.api.getUserGroupList()
+        self.assertGreater(len(result), 0)
+
+        result = self.api.getUserGroupList(user=userId)
+        self.assertGreater(len(result), 1)
+
+        result = self.api.getUserGroupList(group=groupId)
+        self.assertGreater(len(result), 1)
+
+        result = self.api.getUserGroupList(group=groupId, user=userId)
+        self.assertIsInstance(result, dict)
+        self.assertEqual(result['user'], userId)
+        self.assertEqual(result['group'], groupId)
+
+    def test_changeUserGroup(self):
+        """
+        Tries to add and remove a user from a test group
+        IMPORTANT - This test method and the parameters used depend on the target system!
+        Testing with userID 28057 (admin)  and groupID 21037 (Test UserAdd)
+        :return:
+        """
+        userID = 28057
+        groupID = 21037
+
+        self.assertFalse(self.api.changeUserGroup(0, 0, False))
+        self.assertTrue(self.api.changeUserGroup(userID, groupID, True))
+
+        test_result = self.api.getUserGroupList(user=userID, group=groupID)
+        self.assertEqual(test_result['status'], 2)
+
+        self.assertFalse(self.api.changeUserGroup(0, 0, False))
+        self.assertTrue(self.api.changeUserGroup(userID, groupID, False))
+        test_result = self.api.getUserGroupList(user=userID, group=groupID)
+        self.assertEqual(test_result['status'], 4)

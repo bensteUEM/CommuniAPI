@@ -64,6 +64,40 @@ class CommuniApi:
                 "getUserList failed with code {} and message {}".format(response.status_code, response.content))
             return False
 
+    def getUserGroupList(self, **kwargs):
+        """
+        Get a list of UserGroup allocations matching respecting optional id and group id filter
+        :param kwargs:
+        :keyword group: group ID for filter
+        :keyword user: user ID for filter
+        :return:  list of UserGroup allocations
+        """
+
+        url = self.rest_server + '/UserGroup'
+        params = {
+            'loadStatus': True,
+            'communiApp': self.communiAppId
+        }
+
+        if 'group' in kwargs.keys():
+            params['group'] = kwargs['group']
+        if 'user' in kwargs.keys():
+            params['user'] = kwargs['user']
+
+        response = self.session.get(url=url, params=params)
+
+        if response.status_code == 200:
+            response_content = json.loads(response.content)
+            if len(response_content) == 0:
+                logging.debug("Response content empty - maybe group / user ID {}?".format(kwargs))
+                return False
+            else:
+                logging.debug("Found {} assignments - success".format(len(response_content)))
+                return response_content[0] if len(response_content) == 1 else response_content
+        else:
+            logging.warning("Requesting group / user assignements failed with {}".format(response.content))
+            return False
+
     def createGroup(self, title="", description="", access_type_open=False, hasGroupChat=True):
         """
         Method which creates a new group in Communi
@@ -144,7 +178,7 @@ class CommuniApi:
         else:
             id = kwargs['id'] if 'id' in kwargs.keys() else self.getGroups(name=kwargs['name'])['id']
 
-        url = self.rest_server + '/group/'+str(id)
+        url = self.rest_server + '/group/' + str(id)
 
         response = self.session.delete(url)
 
@@ -157,6 +191,47 @@ class CommuniApi:
             logging.debug("Deleting group failed with {}".format(response.content))
             return False
 
+    def changeUserGroup(self, userId, groupId, add_user=True):
+        """
+        Function to add or remove a user from a group
+        Be aware that there might be a few seconds delay before changes are reflected in the app
+
+        :param userId: user specific id
+        :param groupId: group specific id- either from get groups or e.g. from groups detail page
+        :param add_user: boolean if user should be added (or removed if false)
+        :return: ???
+        """
+
+        url = self.rest_server + '/UserGroup/{}-{}'.format(userId, groupId)
+
+        data = {
+            "roleId": 40,
+            "createdOn": "2023-01-08T15:34:48+00:00", #TODO add datetime?
+            "status": 2 if add_user else 4,
+            "user": userId,
+            "group": groupId,
+            "id": "{}-{}".format(userId, groupId),
+            "_rls": 1,
+            "_loadStatus": 10,
+            "valid": True
+        }
+
+        response = self.session.put(url, json=data)
+
+        if response.status_code == 200:
+            response_content = json.loads(response.content)
+            if 'error' not in response_content.keys() :
+                if 'valid' in response_content.keys():
+                    logging.debug("Changed permissions of user {} on group {}?".format(userId, groupId))
+                    return response_content['valid']
+                else:
+                    return False
+            else:
+                return False
+        else:
+            logging.debug(
+                "Changing assignment on user {} with group {} failed with {}".format(userId, groupId, response.content))
+            return False
 
 if __name__ == '__main__':
     api = CommuniApi()
