@@ -16,4 +16,18 @@ class TestsCommuniApp(unittest.TestCase):
     def test_config(self):
         self.assertNotEqual(self.api.communiAppId, 0, 'Please configure a propper App ID in config.py')
         self.assertNotEqual(self.api.token, 'ENTER-YOUR-TOKEN-HERE', 'Please change the default token in config.py')
-        self.assertEqual(self.api.rest_server, 'api.communiapp.de/rest/', 'Are you sure your server is correct?')
+        self.assertEqual(self.api.rest_server, 'https://api.communiapp.de/rest', 'Are you sure your server is correct?')
+
+    def test_login(self):
+        result = self.api.login()
+        self.assertTrue(result)
+
+    def test_getUserList(self):
+        result = self.api.getUserList()
+        self.assertGreater(len(result), 0)
+
+    def test_createGroup(self):
+        result = self.api.createGroup(title="_TesCommuniApp",
+                                      description="Group used by Python Test Case for Automation",
+                                      access_type_open=False, hasGroupChat=True)
+        self.assertTrue(result)
