@@ -23,8 +23,18 @@ class TestsCommuniApp(unittest.TestCase):
         self.assertTrue(result)
 
     def test_getUserList(self):
+        """
+        IMPORTANT - This test method and the parameters used depend on the target system!
+        userId = 28057 => Admin
+        :return:
+        """
+        userId = 28057
+
         result = self.api.getUserList()
         self.assertGreater(len(result), 0)
+
+        result = self.api.getUserList(userId=userId)
+        self.assertIn('id', result.keys())
 
     def test_getGroups(self):
         """

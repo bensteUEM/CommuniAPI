@@ -45,15 +45,20 @@ class CommuniApi:
             logging.debug("Login failed with {}".format(response.content))
             return False
 
-    def getUserList(self):
+    def getUserList(self, **kwargs):
         """
-        Method that requests the list of all users from Communi
+        Method that requests the list of all users from Communi and optionally aplies filter by ID
+        :param kwargs: keyword arguments
+        :keyword userId: user Id to filter by
         :return: list of users or False if unsuccesful
         """
         url = self.rest_server + '/user'  # +'?communiApp=2406&loadStatus=1'
         params = {'communiApp': self.communiAppId,
                   'loadStatus': 1
                   }
+        if 'userId' in kwargs.keys():
+            params['id'] = kwargs['userId']
+
         response = self.session.get(url=url, params=params)
         if response.status_code == 200:
             response_content = json.loads(response.content)
@@ -137,7 +142,7 @@ class CommuniApi:
         :param kwargs:
         :keyword id: get only group with matching id
         :keyword name: get only group with matching name
-        :return:  list of groups or single group if filtered
+        :return: list of groups or single group if filtered
         """
 
         url = self.rest_server + '/group'
@@ -220,7 +225,7 @@ class CommuniApi:
 
         if response.status_code == 200:
             response_content = json.loads(response.content)
-            if 'error' not in response_content.keys() :
+            if 'error' not in response_content.keys():
                 if 'valid' in response_content.keys():
                     logging.debug("Changed permissions of user {} on group {}?".format(userId, groupId))
                     return response_content['valid']
@@ -232,6 +237,7 @@ class CommuniApi:
             logging.debug(
                 "Changing assignment on user {} with group {} failed with {}".format(userId, groupId, response.content))
             return False
+
 
 if __name__ == '__main__':
     api = CommuniApi()
