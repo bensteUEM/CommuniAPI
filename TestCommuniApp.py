@@ -1,5 +1,6 @@
 import logging
 import unittest
+from datetime import datetime
 
 from CommuniApi import CommuniApi
 
@@ -96,7 +97,7 @@ class TestsCommuniApp(unittest.TestCase):
         """
         Tries to add and remove a user from a test group
         IMPORTANT - This test method and the parameters used depend on the target system!
-        Testing with userID 28057 (admin)  and groupID 21037 (Test UserAdd)
+        Testing with userID 28057 (admin)  and groupID 21037 (_TEST Gruppe - UserAdd)
         :return:
         """
         userID = 28057
@@ -112,3 +113,16 @@ class TestsCommuniApp(unittest.TestCase):
         self.assertTrue(self.api.changeUserGroup(userID, groupID, False))
         test_result = self.api.getUserGroupList(user=userID, group=groupID)
         self.assertEqual(test_result['status'], 4)
+
+    def test_message(self):
+        """
+        Attempts to post a chat message text into a test group
+        IMPORTANT - This test method and the parameters used depend on the target system!
+        groupID 21037 (_TEST Gruppe - UserAdd)
+        :return:
+        """
+        groupId = 21037
+        timestamp = datetime.now()
+        result = self.api.message(groupId=groupId,
+                                  text="Hello World from test_postInGroup - on {}".format(timestamp))
+        self.assertTrue(result)

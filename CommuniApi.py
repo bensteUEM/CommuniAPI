@@ -239,6 +239,38 @@ class CommuniApi:
                 "Changing assignment on user {} with group {} failed with {}".format(userId, groupId, response.content))
             return False
 
+    def message(self, groupId, text):
+        """
+        Posts a chat message into a communi group
+        :param groupId: ID of the group to be used for posting
+        :param text: The text which should be posted
+        :return: true if success, false on error
+        """
+
+        url = self.rest_server + '/message'
+
+        data = {
+            "message": text,
+            "conversation": "group-{}".format(groupId)
+        }
+
+        response = self.session.post(url, json=data)
+
+        if response.status_code == 200:
+            response_content = json.loads(response.content)
+            if 'error' not in response_content.keys():
+                if 'valid' in response_content.keys():
+                    logging.debug("Posted message {}".format(data))
+                    return response_content['valid']
+                else:
+                    return False
+            else:
+                return False
+        else:
+            logging.debug(
+                "Posting message {} failed with {}".format(data, response.content))
+            return False
+
 
 if __name__ == '__main__':
     api = CommuniApi()
