@@ -3,28 +3,38 @@
 This code requires a config.py within the "secure" folder in order to work
 
 ## Initial configuration
+This package requires the ChurchToolsApi to be installed.
+If you setup this package using pip it should be a required dependency.
+If you only downloaded this code without package management you will need to install it to your python environment
+
+Check https://github.com/bensteUEM/ChurchToolsAPI/releases for the latest realease.
 
 ### Server connection
-Some changes need to be made to defaults.py before first use.
+By default some changes need to be made to config.py before first use.
 
 1 Get your REST access token from your instance
 e.g. https://YOURINSTANCE.communiapp.de/page/integration/tab/rest
 and save it in the configuration file.
-
 ```
 token = 'ENTER-YOUR-TOKEN-HERE'
 ```
-
 All requests are executed against the central REST server of communi which is part of the default config
 This part does likely not need any change unless you have a special configuration.
 ```
 rest_server = 'api.communiapp.de/rest/'
 ```
-
 In order to addres your own instance (matching to the token) you need to change the communiApp in the config
 ```
 communiApp = 0
 ```
+
+In addition the login details for a ChurchTools instance is required for CT specific access
+```
+ct_domain = 'http://XXX'
+ct_token = ###
+```
+
+ct_users = {'username': 'test'}
 
 # Usage
 

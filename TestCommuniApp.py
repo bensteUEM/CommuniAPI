@@ -2,7 +2,7 @@ import logging
 import unittest
 from datetime import datetime
 
-from CommuniApi import CommuniApi
+from CommuniAPI.CommuniApi import CommuniApi
 
 
 class TestsCommuniApp(unittest.TestCase):
@@ -14,12 +14,21 @@ class TestsCommuniApp(unittest.TestCase):
                             level=logging.DEBUG)
         logging.info("Executing Tests RUN")
 
+    def tearDown(self):
+        """
+        Destroy the session after test execution to avoid resource issues
+        :return:
+        """
+        self.api.session.close()
+
     def test_config(self):
         self.assertNotEqual(self.api.communiAppId, 0, 'Please configure a propper App ID in config.py')
         self.assertNotEqual(self.api.token, 'ENTER-YOUR-TOKEN-HERE', 'Please change the default token in config.py')
         self.assertEqual(self.api.rest_server, 'https://api.communiapp.de/rest', 'Are you sure your server is correct?')
 
     def test_login(self):
+        if self.api.session is not None:
+            self.api.session.close()
         result = self.api.login()
         self.assertTrue(result)
 
