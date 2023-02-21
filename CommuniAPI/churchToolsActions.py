@@ -69,7 +69,7 @@ def generate_services_for_event(ct_api, eventId):
             eventServices[service_group_name][service_name] = []
         if service['personId'] is not None:
             personFromCT = ct_api.get_persons(ids=[service['personId']])
-            person = (personFromCT['email'], "{} {}".format(personFromCT['firstName'], personFromCT['lastName']))
+            person = (personFromCT['email'], "{} {} {}".format('' if service['agreed'] else '?', personFromCT['firstName'], personFromCT['lastName']))
             eventServices[service_group_name][service_name].append(person)
 
     logging.debug('generate_services_for_event')
