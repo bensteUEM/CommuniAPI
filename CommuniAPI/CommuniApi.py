@@ -76,7 +76,7 @@ class CommuniApi:
         :param kwargs:
         :keyword group: group ID for filter
         :keyword user: user ID for filter
-        :return:  list of UserGroup allocations
+        :return: list of UserGroup allocations
         """
 
         url = self.rest_server + '/UserGroup'
@@ -99,7 +99,7 @@ class CommuniApi:
                 return False
             else:
                 logging.debug("Found {} assignments - success".format(len(response_content)))
-                return response_content[0] if len(response_content) == 1 else response_content
+                return response_content
         else:
             logging.warning("Requesting group / user assignements failed with {}".format(response.content))
             return False

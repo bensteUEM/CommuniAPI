@@ -2,7 +2,11 @@ import logging
 import unittest
 from datetime import datetime
 
+from ChurchToolsAPI import ChurchToolsApi
+
 from CommuniAPI.CommuniApi import CommuniApi
+from CommuniAPI.churchToolsActions import create_event_chats, delete_event_chats
+from secure.config import ct_domain, ct_token
 
 
 class TestsCommuniApp(unittest.TestCase):
@@ -98,9 +102,9 @@ class TestsCommuniApp(unittest.TestCase):
         self.assertGreater(len(result), 1)
 
         result = self.api.getUserGroupList(group=groupId, user=userId)
-        self.assertIsInstance(result, dict)
-        self.assertEqual(result['user'], userId)
-        self.assertEqual(result['group'], groupId)
+        self.assertEqual(1, len(result))
+        self.assertEqual(result[0]['user'], userId)
+        self.assertEqual(result[0]['group'], groupId)
 
     def test_changeUserGroup(self):
         """
@@ -116,12 +120,13 @@ class TestsCommuniApp(unittest.TestCase):
         self.assertTrue(self.api.changeUserGroup(userID, groupID, True))
 
         test_result = self.api.getUserGroupList(user=userID, group=groupID)
-        self.assertEqual(test_result['status'], 2)
+        self.assertEqual(len(test_result), 1)
+        self.assertEqual(test_result[0]['status'], 2)
 
         self.assertFalse(self.api.changeUserGroup(0, 0, False))
         self.assertTrue(self.api.changeUserGroup(userID, groupID, False))
         test_result = self.api.getUserGroupList(user=userID, group=groupID)
-        self.assertEqual(test_result['status'], 4)
+        self.assertEqual(test_result[0]['status'], 4)
 
     def test_message(self):
         """
@@ -135,3 +140,18 @@ class TestsCommuniApp(unittest.TestCase):
         result = self.api.message(groupId=groupId,
                                   text="Hello World from test_postInGroup - on {}".format(timestamp))
         self.assertTrue(result)
+
+    def test_create_event_chats(self):
+        """
+        Testing method to check if event creation and user update works
+        IMPORTANT - This test method and the parameters used depend on the target system!
+        event ID 2626 on elkw1610.krz.tools represents a rest event with multiple services
+        :return:
+        """
+        test_event_ids = [2626]
+        ct_api = ChurchToolsApi.ChurchToolsApi(ct_domain, ct_token)
+        result = create_event_chats(ct_api, self.api, test_event_ids, only_relevant=True)
+        self.assertEqual(True, result)
+
+        result = delete_event_chats(ct_api, self.api, test_event_ids)
+        self.assertEqual(True, result)
