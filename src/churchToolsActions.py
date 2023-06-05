@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 
-from CommuniAPI.communiActions import get_create_or_delete_group, update_group_users_by_services
+from src.communiActions import get_create_or_delete_group, update_group_users_by_services
 
 
 def generate_group_name_for_event(ct_api, eventId):

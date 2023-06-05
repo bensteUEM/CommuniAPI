@@ -2,23 +2,31 @@ import json
 import logging
 from datetime import datetime
 
-import requests as requests
-
-from secure.config import *
-
+import requests
 
 class CommuniApi:
+    """ CommuniAPI class which can be used for all actions with Communi
+    """
 
-    def __init__(self):
+    def __init__(self, communi_server, communi_token, communi_appid):
+        """
+
+        Args:
+            communi_token (str): security token used for access - see /page/integration/tab/rest within communi as admin
+            communi_server (str): REST endpoint of the server https://api.communiapp.de/rest by default
+            communi_appid (int): app ID of the communi instance to be used - see /page/integration/tab/rest within communi as admin
+        """
+
         super().__init__()
-        self.rest_server = rest_server
-        self.token = token
-        self.communiAppId = communiAppId
+        self.communi_server = communi_server
+        self.communi_token = communi_token
+        self.communi_appid = communi_appid
+
         logging.basicConfig(filename='logs/CommuniApi.log', encoding='utf-8',
                             format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
                             level=logging.DEBUG)
         self.session = requests.Session()
-        self.session.headers['X-Authorization'] = 'Bearer ' + self.token
+        self.session.headers['X-Authorization'] = 'Bearer ' + self.communi_token
 
         logging.debug('Instance initialized')
 
@@ -27,8 +35,8 @@ class CommuniApi:
         Default print option for the class
         :return:
         """
-        text = "This is a Communi API instance connected to {} with CommuniApp {}".format(self.rest_server,
-                                                                                          self.communiAppId)
+        text = "This is a Communi API instance connected to {} with CommuniApp {}".format(self.communi_server,
+                                                                                          self.communi_appid)
         return text
 
     def login(self):
@@ -36,7 +44,7 @@ class CommuniApi:
         Method to confirm login id
         :return:  either response content or False if unsucessful
         """
-        url = self.rest_server + '/login'
+        url = self.communi_server + '/login'
         response = self.session.get(url=url)
         if response.status_code == 200:
             response_content = json.loads(response.content)
@@ -53,8 +61,8 @@ class CommuniApi:
         :keyword userId: user Id to filter by
         :return: list of users or False if unsuccesful
         """
-        url = self.rest_server + '/user'  # +'?communiApp=2406&loadStatus=1'
-        params = {'communiApp': self.communiAppId,
+        url = self.communi_server + '/user'  # +'?communiApp=2406&loadStatus=1'
+        params = {'communiApp': self.communi_appid,
                   'loadStatus': 1
                   }
         if 'userId' in kwargs.keys():
@@ -79,10 +87,10 @@ class CommuniApi:
         :return: list of UserGroup allocations
         """
 
-        url = self.rest_server + '/UserGroup'
+        url = self.communi_server + '/UserGroup'
         params = {
             'loadStatus': True,
-            'communiApp': self.communiAppId
+            'communiApp': self.communi_appid
         }
 
         if 'group' in kwargs.keys():
@@ -113,14 +121,14 @@ class CommuniApi:
         :param hasGroupChat: boolean set to true if chat should exist
         :return: response for group creation from communi or false if not successful
         """
-        url = self.rest_server + '/group'
+        url = self.communi_server + '/group'
         data = {
             'title': title,
             'description': description,
             'type': '2',
             'accessType': '2' if access_type_open else '3',
             "hasGroupChat": hasGroupChat,
-            "communiApp": self.communiAppId
+            "communiApp": self.communi_appid
         }
 
         response = self.session.post(url=url, json=data)
@@ -146,10 +154,10 @@ class CommuniApi:
         :return: list of groups or single group if filtered
         """
 
-        url = self.rest_server + '/group'
+        url = self.communi_server + '/group'
         params = {
             'loadStatus': True,
-            'communiApp': self.communiAppId
+            'communiApp': self.communi_appid
         }
         if 'id' in kwargs.keys():
             params['id'] = kwargs['id']
@@ -184,7 +192,7 @@ class CommuniApi:
         else:
             id = kwargs['id'] if 'id' in kwargs.keys() else self.getGroups(name=kwargs['name'])['id']
 
-        url = self.rest_server + '/group/' + str(id)
+        url = self.communi_server + '/group/' + str(id)
 
         response = self.session.delete(url)
 
@@ -208,7 +216,7 @@ class CommuniApi:
         :return: ???
         """
 
-        url = self.rest_server + '/UserGroup/{}-{}'.format(userId, groupId)
+        url = self.communi_server + '/UserGroup/{}-{}'.format(userId, groupId)
 
         data = {
             "roleId": 40,
@@ -247,7 +255,7 @@ class CommuniApi:
         :return: true if success, false on error
         """
 
-        url = self.rest_server + '/message'
+        url = self.communi_server + '/message'
 
         data = {
             "message": text,
@@ -270,8 +278,3 @@ class CommuniApi:
             logging.debug(
                 "Posting message {} failed with {}".format(data, response.content))
             return False
-
-
-if __name__ == '__main__':
-    api = CommuniApi()
-    print(api)
