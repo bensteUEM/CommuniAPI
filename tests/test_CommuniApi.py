@@ -3,7 +3,7 @@ import os
 import unittest
 from datetime import datetime
 
-from ChurchToolsAPI import ChurchToolsApi
+from ChurchToolsApi import ChurchToolsApi
 
 from src.CommuniApi import CommuniApi
 from src.churchToolsActions import create_event_chats, delete_event_chats
