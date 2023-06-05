@@ -32,7 +32,7 @@ class TestsCommuniApp(unittest.TestCase):
             self.CT_DOMAIN =  ct_domain
             logging.info('using connection details provided from secrets folder')
 
-        self.api = CommuniApi(rest_server, token, communiAppId)
+        self.api = CommuniApi(self.COMMUNI_SERVER, self.COMMUNI_TOKEN, self.COMMUNI_APPID)
         self.ct_api = ChurchToolsApi(self.CT_DOMAIN, self.CT_TOKEN)
         logging.info("Executing Tests RUN")
 
