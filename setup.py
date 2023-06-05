@@ -1,11 +1,15 @@
 from setuptools import setup, find_packages
+from versions import VERSION
 
 with open("README.md", "r") as file:
     description = file.read()
 
+with open('requirements.txt') as f:
+    requirements = f.read().splitlines()
+
 setup(
-    name='CommuniAPI',
-    version='0.9',
+    name='CommuniApi',
+    version=VERSION,
     author='bensteUEM',
     author_email='benedict.stein@gmail.com',
     description='A python package to make use of Communi API',
@@ -15,7 +19,6 @@ setup(
     license='CC-BY-SA',
     python_requires='>=3.8',
     packages=find_packages(),
-    install_requires=[
-        'ChurchToolsApi @ git+https://github.com/bensteUEM/ChurchToolsAPI.git@v1.1.1#egg=ChurchToolsAPI'
-    ],
+    include_package_data=True,
+    install_requires=requirements,
 )
