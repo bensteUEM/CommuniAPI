@@ -7,8 +7,6 @@ from ChurchToolsAPI import ChurchToolsApi
 
 from src.CommuniApi import CommuniApi
 from src.churchToolsActions import create_event_chats, delete_event_chats
-from secure.config import ct_domain, ct_token
-
 
 class TestsCommuniApp(unittest.TestCase):
     def __init__(self, *args, **kwargs):
