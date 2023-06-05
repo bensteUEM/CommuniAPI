@@ -11,6 +11,8 @@ class TestsCommuniApp(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestsCommuniApp, self).__init__(*args, **kwargs)
     
+        open('logs/TestsCommuniApp.log', 'w').close()
+
         logging.basicConfig(filename='logs/TestsCommuniApp.log', encoding='utf-8',
                             format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
                             level=logging.DEBUG)
