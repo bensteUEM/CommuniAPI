@@ -4,9 +4,8 @@ import unittest
 from datetime import datetime
 
 from ChurchToolsApi import ChurchToolsApi
-
-from src.CommuniApi import CommuniApi
-from src.churchToolsActions import create_event_chats, delete_event_chats
+from CommuniApi import CommuniApi
+from CommuniApi.churchToolsActions import create_event_chats, delete_event_chats
 
 class TestsCommuniApp(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -34,6 +33,7 @@ class TestsCommuniApp(unittest.TestCase):
             logging.info('using connection details provided from secrets folder')
 
         self.api = CommuniApi(rest_server, token, communiAppId)
+        self.ct_api = ChurchToolsApi(self.CT_DOMAIN, self.CT_TOKEN)
         logging.info("Executing Tests RUN")
 
     def tearDown(self):
@@ -167,9 +167,8 @@ class TestsCommuniApp(unittest.TestCase):
         :return:
         """
         test_event_ids = [2626]
-        ct_api = ChurchToolsApi.ChurchToolsApi(self.CT_DOMAIN, self.CT_TOKEN)
-        result = create_event_chats(ct_api, self.api, test_event_ids, only_relevant=True)
+        result = create_event_chats(self.ct_api, self.api, test_event_ids, only_relevant=True)
         self.assertEqual(True, result)
 
-        result = delete_event_chats(ct_api, self.api, test_event_ids)
+        result = delete_event_chats(self.ct_api, self.api, test_event_ids)
         self.assertEqual(True, result)
