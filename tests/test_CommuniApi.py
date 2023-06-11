@@ -1,21 +1,39 @@
 import logging
+import os
 import unittest
 from datetime import datetime
 
-from ChurchToolsAPI import ChurchToolsApi
-
-from CommuniAPI.CommuniApi import CommuniApi
-from CommuniAPI.churchToolsActions import create_event_chats, delete_event_chats
-from secure.config import ct_domain, ct_token
-
+from ChurchToolsApi import ChurchToolsApi
+from CommuniApi import CommuniApi
+from CommuniApi.churchToolsActions import create_event_chats, delete_event_chats
 
 class TestsCommuniApp(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestsCommuniApp, self).__init__(*args, **kwargs)
-        self.api = CommuniApi()
+        os.makedirs('logs', exist_ok=True)
         logging.basicConfig(filename='logs/TestsCommuniApp.log', encoding='utf-8',
                             format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
                             level=logging.DEBUG)
+        
+        if 'COMMUNI_TOKEN' in os.environ:
+            self.COMMUNI_TOKEN = os.environ['COMMUNI_TOKEN']
+            self.COMMUNI_SERVER = os.environ['COMMUNI_SERVER']
+            self.COMMUNI_APPID = os.environ['COMMUNI_APPID']
+            self.CT_TOKEN =  os.environ['CT_TOKEN']
+            self.CT_DOMAIN =  os.environ['CT_DOMAIN']
+            logging.info('using connection details provided with ENV variables')
+        else:
+            from secure.config import token, rest_server, communiAppId
+            self.COMMUNI_TOKEN = token
+            self.COMMUNI_SERVER = rest_server
+            self.COMMUNI_APPID = communiAppId
+            from secure.config import ct_token, ct_domain
+            self.CT_TOKEN = ct_token
+            self.CT_DOMAIN =  ct_domain
+            logging.info('using connection details provided from secrets folder')
+
+        self.api = CommuniApi(self.COMMUNI_SERVER, self.COMMUNI_TOKEN, self.COMMUNI_APPID)
+        self.ct_api = ChurchToolsApi(self.CT_DOMAIN, self.CT_TOKEN)
         logging.info("Executing Tests RUN")
 
     def tearDown(self):
@@ -26,9 +44,9 @@ class TestsCommuniApp(unittest.TestCase):
         self.api.session.close()
 
     def test_config(self):
-        self.assertNotEqual(self.api.communiAppId, 0, 'Please configure a propper App ID in config.py')
-        self.assertNotEqual(self.api.token, 'ENTER-YOUR-TOKEN-HERE', 'Please change the default token in config.py')
-        self.assertEqual(self.api.rest_server, 'https://api.communiapp.de/rest', 'Are you sure your server is correct?')
+        self.assertNotEqual(self.api.communi_appid, 0, 'Please configure a propper App ID in config.py')
+        self.assertNotEqual(self.api.communi_token, 'ENTER-YOUR-TOKEN-HERE', 'Please change the default token in config.py')
+        self.assertEqual(self.api.communi_server, 'https://api.communiapp.de/rest', 'Are you sure your server is correct?')
 
     def test_login(self):
         if self.api.session is not None:
@@ -149,9 +167,8 @@ class TestsCommuniApp(unittest.TestCase):
         :return:
         """
         test_event_ids = [2626]
-        ct_api = ChurchToolsApi.ChurchToolsApi(ct_domain, ct_token)
-        result = create_event_chats(ct_api, self.api, test_event_ids, only_relevant=True)
+        result = create_event_chats(self.ct_api, self.api, test_event_ids, only_relevant=True)
         self.assertEqual(True, result)
 
-        result = delete_event_chats(ct_api, self.api, test_event_ids)
+        result = delete_event_chats(self.ct_api, self.api, test_event_ids)
         self.assertEqual(True, result)

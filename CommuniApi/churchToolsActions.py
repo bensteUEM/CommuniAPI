@@ -1,8 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-
-from CommuniAPI.communiActions import get_create_or_delete_group, update_group_users_by_services
-
+from CommuniApi.communiActions import get_create_or_delete_group, update_group_users_by_services
 
 def generate_group_name_for_event(ct_api, eventId):
     """
@@ -14,7 +12,7 @@ def generate_group_name_for_event(ct_api, eventId):
     :return: group_name
     :rtype: str
     """
-    event = ct_api.get_events(eventId=eventId)
+    event = ct_api.get_events(eventId=eventId)[0]
 
     date = datetime.strptime(event['startDate'], "%Y-%m-%dT%H:%M:%S%z")
     datestring = date.astimezone().strftime('%a %d.%m (%H:%M)')
@@ -54,8 +52,7 @@ def generate_services_for_event(ct_api, eventId):
     :rtype: dict
     """
     logging.info("Trying to get list of involved persons for next event")
-    # events = ct_api.get_events()
-    event = ct_api.get_events(eventId=eventId)
+    event = ct_api.get_events(eventId=eventId, include='eventServices')[0]
     service_names = ct_api.get_services(returnAsDict=True)
 
     serviceGroups = ct_api.get_event_masterdata(type='serviceGroups', returnAsDict=True)
@@ -68,7 +65,7 @@ def generate_services_for_event(ct_api, eventId):
         if service_name not in eventServices[service_group_name].keys():
             eventServices[service_group_name][service_name] = []
         if service['personId'] is not None:
-            personFromCT = ct_api.get_persons(ids=[service['personId']])
+            personFromCT = ct_api.get_persons(ids=[service['personId']])[0]
             person = (personFromCT['email'], "{} {} {}".format('' if service['agreed'] else '?', personFromCT['firstName'], personFromCT['lastName']))
             eventServices[service_group_name][service_name].append(person)
 
