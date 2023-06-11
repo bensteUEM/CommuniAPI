@@ -12,6 +12,17 @@
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "justMyCode": true
-        }
+        },
+        {
+            "name": "Python: sdist bdist_wheel",
+            "type": "python",
+            "request": "launch",
+            "module": "setup",
+            "args": [
+              "sdist",
+              "bdist_wheel"
+            ],
+            "cwd": "${workspaceFolder}"
+          }
     ]
 }

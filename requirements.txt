@@ -1,1 +1,1 @@
-git+https://github.com/bensteUEM/ChurchToolsAPI.git@1.3.10#egg=ChurchToolsAPI
+ChurchToolsAPI @ git+https://github.com/bensteUEM/ChurchToolsAPI.git@1.3.10#egg=ChurchToolsAPI
