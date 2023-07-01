@@ -55,15 +55,22 @@ class TestsCommuniApp(unittest.TestCase):
         self.assertTrue(result)
 
     def test_who_am_i(self):
-        """This test overwrites the stored user_id in order to fail who_am_i()
-        It will restore the original ID and expect a successful response
         """
-        user_id = self.api.user_id
-        self.api.user_id = 0
+        This test tries to login with invalid credentials
+        it will reset to original credentials afterwards
+        """
+
+        #Make auth fail on purpose
+        old_token = self.api.communi_token
+        self.api.communi_token = 'FAIL'
+
+        self.api.login()
         result = self.api.who_am_i()
         self.assertFalse(result)
 
-        self.api.user_id = user_id
+        self.api.communi_token = old_token
+        self.api.login()
+
         result = self.api.who_am_i()
         self.assertIsInstance(result, dict)
         self.assertIn('id', result.keys())

@@ -26,9 +26,6 @@ class CommuniApi:
                             format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
                             level=logging.DEBUG)
         self.session = requests.Session()
-        self.session.headers['X-Authorization'] = 'Bearer ' + self.communi_token
-
-        self.user_id = None
         self.login()
 
         logging.debug('Instance initialized')
@@ -44,10 +41,12 @@ class CommuniApi:
 
     def login(self):
         """
-        Method to confirm login id
+        Method used for login (with token, server stored in instance)
         :return:  either response content or False if unsucessful
         """
         url = self.communi_server + '/login'
+        self.session.headers['X-Authorization'] = 'Bearer ' + self.communi_token
+
         response = self.session.get(url=url)
         if response.status_code == 200:
             response_content = json.loads(response.content)
@@ -55,6 +54,7 @@ class CommuniApi:
             logging.debug("Login with user ID:{} - success".format(self.user_id))
             return response_content
         else:
+            del self.user_id
             logging.debug("Login failed with {}".format(response.content))
             return False
 
@@ -65,11 +65,9 @@ class CommuniApi:
         :return: dict of user OR bool False if not successful
         """
 
-        userList = self.getUserList(userId=self.user_id)
-        if userList == {'_loadStatus': '1', 'vorname': '', 'nachname': ''}:
+        if not hasattr(self,'user_id'):
             return False
-        else:
-            return self.getUserList(userId=self.user_id)
+        return self.getUserList(userId=self.user_id)
 
     def getUserList(self, **kwargs):
         """
