@@ -65,8 +65,10 @@ def update_group_users_by_services(communi_api, event_services, groupId):
                 mail = user[0]
                 name = user[1]
                 logging.debug('Trying to match {} of user {} for service {}'.format(mail, name, service_name))
-
-                if mail in communi_users_ids.keys():
+                if service_name in ['Begrüßung & Opferzählen', 'Opfer zählen']:
+                    logging.debug('not adding User {} with mail {} because of service name'.format(name, mail))
+                    user_name_text += '\n• {} - nicht im Chat'.format(name)
+                elif mail in communi_users_ids.keys():
                     communi_user_id = communi_users_ids[mail]
                     logging.debug('User {} found in communi'.format(mail))
                     if new_group or (communi_user_id not in user_group_list):

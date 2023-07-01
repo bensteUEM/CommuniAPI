@@ -27,6 +27,7 @@ class CommuniApi:
                             level=logging.DEBUG)
         self.session = requests.Session()
         self.session.headers['X-Authorization'] = 'Bearer ' + self.communi_token
+        self.login()
 
         logging.debug('Instance initialized')
 
@@ -48,11 +49,25 @@ class CommuniApi:
         response = self.session.get(url=url)
         if response.status_code == 200:
             response_content = json.loads(response.content)
-            logging.debug("Login with user ID:{} - success".format(response_content['id']))
+            self.user_id = response_content['id']
+            logging.debug("Login with user ID:{} - success".format(self.user_id))
             return response_content
         else:
             logging.debug("Login failed with {}".format(response.content))
             return False
+
+    def who_am_i(self):
+        """ Method to request user information associated with the logged in user (id stored upon successful login)
+        This can be used to test if the user is authorized
+
+        :return: dict of user OR bool False if not successful
+        """
+
+        userList = self.getUserList(userId=self.user_id)
+        if userList == {'_loadStatus': '1', 'vorname': '', 'nachname': ''}:
+            return False
+        else:
+            return self.getUserList(userId=self.user_id)
 
     def getUserList(self, **kwargs):
         """

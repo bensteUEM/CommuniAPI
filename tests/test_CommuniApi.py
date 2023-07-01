@@ -54,6 +54,26 @@ class TestsCommuniApp(unittest.TestCase):
         result = self.api.login()
         self.assertTrue(result)
 
+    def test_who_am_i(self):
+        """This test overwrites the stored user_id in order to fail who_am_i()
+        It will restore the original ID and expect a successful response
+        """
+        user_id = self.api.user_id
+        self.api.user_id = 0
+        result = self.api.who_am_i()
+        self.assertFalse(result)
+
+        self.api.user_id = user_id
+        result = self.api.who_am_i()
+        self.assertIsInstance(result, dict)
+        self.assertIn('id', result.keys())
+        self.assertGreaterEqual(result['id'],0)
+        self.assertGreaterEqual(len(result['vorname']),1)
+        self.assertGreaterEqual(len(result['nachname']),1)
+        self.assertIn('mailadresse', result.keys())
+        self.assertGreaterEqual(len(result['mailadresse']),1)
+
+
     def test_getUserList(self):
         """
         IMPORTANT - This test method and the parameters used depend on the target system!
