@@ -27,6 +27,8 @@ class CommuniApi:
                             level=logging.DEBUG)
         self.session = requests.Session()
         self.session.headers['X-Authorization'] = 'Bearer ' + self.communi_token
+
+        self.user_id = None
         self.login()
 
         logging.debug('Instance initialized')
