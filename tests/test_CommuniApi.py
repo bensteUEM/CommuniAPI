@@ -54,6 +54,20 @@ class TestsCommuniApp(unittest.TestCase):
         result = self.api.login()
         self.assertTrue(result)
 
+    def test_login_wrong_app(self):
+        temp_COMMUNI_APPID = self.api.communi_appid
+        self.api.communi_appid = 9999
+        if self.api.session is not None:
+            self.api.session.close()
+        result = self.api.login()
+        self.assertFalse(result)
+
+        self.api.communi_appid = temp_COMMUNI_APPID
+        if self.api.session is not None:
+            self.api.session.close()
+        result = self.api.login()
+        self.assertTrue(result)
+
     def test_who_am_i(self):
         """
         This test tries to login with invalid credentials
@@ -127,7 +141,7 @@ class TestsCommuniApp(unittest.TestCase):
         self.assertTrue(result)
 
         result2 = self.api.deleteGroup(name=group2['title'])
-        self.assertTrue(result)
+        self.assertTrue(result2)
 
     def test_userGroupList(self):
         """

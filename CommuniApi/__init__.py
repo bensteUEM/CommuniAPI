@@ -52,7 +52,13 @@ class CommuniApi:
             response_content = json.loads(response.content)
             self.user_id = response_content['id']
             logging.debug("Login with user ID:{} - success".format(self.user_id))
-            return response_content
+
+            groups = self.getGroups()
+            if groups:
+                return response_content
+            else:
+                logging.warn(f'Login with App-ID:{self.communi_appid} did not return groups - either APP-ID wrong or empty app')
+                return False
         else:
             del self.user_id
             logging.debug("Login failed with {}".format(response.content))
