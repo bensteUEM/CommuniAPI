@@ -148,22 +148,26 @@ class TestsCommuniApp(unittest.TestCase):
         IMPORTANT - This test method and the parameters used depend on the target system!
         :return:
         """
-        userId = 28057
-        groupId = 21037
+        user_id = 28057
+        group_id = self.api.createGroup("_test_userGroupList ", 'If this group exists some test failed - please delete')['id']
+        self.api.changeUserGroup(userId=user_id, groupId=group_id, add_user=True)
 
         result = self.api.getUserGroupList()
         self.assertGreater(len(result), 0)
 
-        result = self.api.getUserGroupList(user=userId)
+        result = self.api.getUserGroupList(user=user_id)
         self.assertGreater(len(result), 1)
 
-        result = self.api.getUserGroupList(group=groupId)
+        result = self.api.getUserGroupList(group=group_id)
         self.assertGreater(len(result), 1)
 
-        result = self.api.getUserGroupList(group=groupId, user=userId)
+        result = self.api.getUserGroupList(group=group_id, user=user_id)
         self.assertEqual(1, len(result))
-        self.assertEqual(result[0]['user'], userId)
-        self.assertEqual(result[0]['group'], groupId)
+        self.assertEqual(result[0]['user'], user_id)
+        self.assertEqual(result[0]['group'], group_id)
+
+        result = self.api.deleteGroup(id=group_id)
+        self.assertTrue(result)
 
     def test_changeUserGroup(self):
         """
@@ -172,20 +176,24 @@ class TestsCommuniApp(unittest.TestCase):
         Testing with userID 28057 (admin)  and groupID 21037 (_TEST Gruppe - UserAdd)
         :return:
         """
-        userID = 28057
-        groupID = 21037
+        user_id = 28057
+        group_id= self.api.createGroup("_test_changeUserGroup ", 'If this group exists some test failed - please delete')['id']
 
         self.assertFalse(self.api.changeUserGroup(0, 0, False))
-        self.assertTrue(self.api.changeUserGroup(userID, groupID, True))
+        self.assertTrue(self.api.changeUserGroup(user_id, group_id, True))
 
-        test_result = self.api.getUserGroupList(user=userID, group=groupID)
+        test_result = self.api.getUserGroupList(user=user_id, group=group_id)
         self.assertEqual(len(test_result), 1)
         self.assertEqual(test_result[0]['status'], 2)
 
         self.assertFalse(self.api.changeUserGroup(0, 0, False))
-        self.assertTrue(self.api.changeUserGroup(userID, groupID, False))
-        test_result = self.api.getUserGroupList(user=userID, group=groupID)
+        self.assertTrue(self.api.changeUserGroup(user_id, group_id, False))
+        test_result = self.api.getUserGroupList(user=user_id, group=group_id)
         self.assertEqual(test_result[0]['status'], 4)
+
+        result = self.api.deleteGroup(id=group_id)
+        self.assertTrue(result)
+
 
     def test_message(self):
         """
@@ -194,10 +202,14 @@ class TestsCommuniApp(unittest.TestCase):
         groupID 21037 (_TEST Gruppe - UserAdd)
         :return:
         """
-        groupId = 21037
+        group_id= self.api.createGroup("_test_message ", 'If this group exists some test failed - please delete')['id']
+
         timestamp = datetime.now()
-        result = self.api.message(groupId=groupId,
+        result = self.api.message(groupId=group_id,
                                   text="Hello World from test_postInGroup - on {}".format(timestamp))
+        self.assertTrue(result)
+
+        result = self.api.deleteGroup(id=group_id)
         self.assertTrue(result)
 
     def test_create_event_chats(self):

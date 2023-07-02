@@ -23,8 +23,12 @@ def get_create_or_delete_group(communi_api, group_name, delete=False):
             return group['id']
 
     if not delete:
-        event_description = 'TESTPHASE - Automatische Gruppe für die Diskussion zum angegeben Gottesdienst' \
-                            ' - Wird einige Tage nach dem Event automatisch gelöscht!'
+        event_description = \
+        'Automatisch erstellte Gruppe für die Diskussion zur im Titel angegeben Veranstaltung' \
+        ' Alle in ChurchTools beteiligten Personen werden mit ca. 2 Wochen Vorlauf hinzugefügt' \
+        ' (Ausnahme - Die Dienste Begrüßung/Opfer werden nicht automatisch hinzugefügt)' \
+        ' Fehlende/ Aktualisierte Personen werden sporadisch mit neuen Wochen aktualisiert' \
+        ' - ACHTUNG - Wenige Tage nach Veranstaltung wird die Gruppe wieder gelöscht!'
         newGroup = communi_api.createGroup(group_name, event_description, False, True)
         return newGroup['id']
     else:
@@ -67,7 +71,7 @@ def update_group_users_by_services(communi_api, event_services, groupId):
                 logging.debug('Trying to match {} of user {} for service {}'.format(mail, name, service_name))
                 if service_name in ['Begrüßung & Opferzählen', 'Opfer zählen']:
                     logging.debug('not adding User {} with mail {} because of service name'.format(name, mail))
-                    user_name_text += '\n• {} - nicht im Chat'.format(name)
+                    user_name_text += '\n• {} - (für Gruppe ausgelassen)'.format(name)
                 elif mail in communi_users_ids.keys():
                     communi_user_id = communi_users_ids[mail]
                     logging.debug('User {} found in communi'.format(mail))
@@ -76,7 +80,7 @@ def update_group_users_by_services(communi_api, event_services, groupId):
                         user_name_text += '\n• {}'.format(name)
                         communi_api.changeUserGroup(communi_user_id, groupId, True)
                 else:
-                    user_name_text += '\n• {} - KEIN COMMUNI'.format(name)
+                    user_name_text += '\n• {} - FEHLT - (Mailadresse unbekannt)'.format(name)
                     logging.debug('User {} with mail {} NOT found in communi'.format(name, mail))
             if len(user_name_text) > 1:
                 text += '\n' + service_name

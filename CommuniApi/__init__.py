@@ -60,7 +60,8 @@ class CommuniApi:
                 logging.warn(f'Login with App-ID:{self.communi_appid} did not return groups - either APP-ID wrong or empty app')
                 return False
         else:
-            del self.user_id
+            if hasattr(self,'user_id'):
+                del self.user_id
             logging.debug("Login failed with {}".format(response.content))
             return False
 
