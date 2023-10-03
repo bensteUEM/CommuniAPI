@@ -48,9 +48,13 @@ The respective function do have a hint like the one below in the docstring of th
 IMPORTANT - This test method and the parameters used depend on the target system!
 ```
 
+# Recurring use cases
+To simplify recurring use cases all required steps are documented in a Jupyter Notebook.
+Check main.ipynb - at present it creates a connection and deletes old event chats while new ones are created
+
 ## Compatibility
 
-Tested against the current CommuniAPIs as of July 2023.
+Tested against the current CommuniAPIs as of October 2023.
 More information is provided on the respective Communi pages.
 
 # License

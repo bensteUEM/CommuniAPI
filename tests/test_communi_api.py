@@ -3,9 +3,10 @@ import os
 import unittest
 from datetime import datetime
 
-from ChurchToolsApi import ChurchToolsApi
-from CommuniApi import CommuniApi
-from CommuniApi.churchToolsActions import create_event_chats, delete_event_chats
+from churchtools_api.churchtools_api import ChurchToolsApi
+from communi_api.communi_api import CommuniApi
+from communi_api.churchToolsActions import create_event_chats, delete_event_chats
+
 
 class TestsCommuniApp(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -14,14 +15,15 @@ class TestsCommuniApp(unittest.TestCase):
         logging.basicConfig(filename='logs/TestsCommuniApp.log', encoding='utf-8',
                             format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
                             level=logging.DEBUG)
-        
+
         if 'COMMUNI_TOKEN' in os.environ:
             self.COMMUNI_TOKEN = os.environ['COMMUNI_TOKEN']
             self.COMMUNI_SERVER = os.environ['COMMUNI_SERVER']
             self.COMMUNI_APPID = os.environ['COMMUNI_APPID']
-            self.CT_TOKEN =  os.environ['CT_TOKEN']
-            self.CT_DOMAIN =  os.environ['CT_DOMAIN']
-            logging.info('using connection details provided with ENV variables')
+            self.CT_TOKEN = os.environ['CT_TOKEN']
+            self.CT_DOMAIN = os.environ['CT_DOMAIN']
+            logging.info(
+                'using connection details provided with ENV variables')
         else:
             from secure.config import token, rest_server, communiAppId
             self.COMMUNI_TOKEN = token
@@ -29,10 +31,14 @@ class TestsCommuniApp(unittest.TestCase):
             self.COMMUNI_APPID = communiAppId
             from secure.config import ct_token, ct_domain
             self.CT_TOKEN = ct_token
-            self.CT_DOMAIN =  ct_domain
-            logging.info('using connection details provided from secrets folder')
+            self.CT_DOMAIN = ct_domain
+            logging.info(
+                'using connection details provided from secrets folder')
 
-        self.api = CommuniApi(self.COMMUNI_SERVER, self.COMMUNI_TOKEN, self.COMMUNI_APPID)
+        self.api = CommuniApi(
+            self.COMMUNI_SERVER,
+            self.COMMUNI_TOKEN,
+            self.COMMUNI_APPID)
         self.ct_api = ChurchToolsApi(self.CT_DOMAIN, self.CT_TOKEN)
         logging.info("Executing Tests RUN")
 
@@ -44,9 +50,18 @@ class TestsCommuniApp(unittest.TestCase):
         self.api.session.close()
 
     def test_config(self):
-        self.assertNotEqual(self.api.communi_appid, 0, 'Please configure a propper App ID in config.py')
-        self.assertNotEqual(self.api.communi_token, 'ENTER-YOUR-TOKEN-HERE', 'Please change the default token in config.py')
-        self.assertEqual(self.api.communi_server, 'https://api.communiapp.de/rest', 'Are you sure your server is correct?')
+        self.assertNotEqual(
+            self.api.communi_appid,
+            0,
+            'Please configure a propper App ID in config.py')
+        self.assertNotEqual(
+            self.api.communi_token,
+            'ENTER-YOUR-TOKEN-HERE',
+            'Please change the default token in config.py')
+        self.assertEqual(
+            self.api.communi_server,
+            'https://api.communiapp.de/rest',
+            'Are you sure your server is correct?')
 
     def test_login(self):
         if self.api.session is not None:
@@ -74,7 +89,7 @@ class TestsCommuniApp(unittest.TestCase):
         it will reset to original credentials afterwards
         """
 
-        #Make auth fail on purpose
+        # Make auth fail on purpose
         old_token = self.api.communi_token
         self.api.communi_token = 'FAIL'
 
@@ -88,12 +103,11 @@ class TestsCommuniApp(unittest.TestCase):
         result = self.api.who_am_i()
         self.assertIsInstance(result, dict)
         self.assertIn('id', result.keys())
-        self.assertGreaterEqual(result['id'],0)
-        self.assertGreaterEqual(len(result['vorname']),1)
-        self.assertGreaterEqual(len(result['nachname']),1)
+        self.assertGreaterEqual(result['id'], 0)
+        self.assertGreaterEqual(len(result['vorname']), 1)
+        self.assertGreaterEqual(len(result['nachname']), 1)
         self.assertIn('mailadresse', result.keys())
-        self.assertGreaterEqual(len(result['mailadresse']),1)
-
+        self.assertGreaterEqual(len(result['mailadresse']), 1)
 
     def test_getUserList(self):
         """
@@ -121,8 +135,8 @@ class TestsCommuniApp(unittest.TestCase):
         test_title = 'Evang. Kirche Baiersbronn'
         self.assertEqual(result, test_title)
 
-        result = self.api.getGroups(name='Jungenschaft')['id']
-        test_id = 7646
+        result = self.api.getGroups(name='Admins und Moderatoren')['id']
+        test_id = 7676
         self.assertEqual(result, test_id)
 
     def test_createDeleteGroup(self):
@@ -149,8 +163,13 @@ class TestsCommuniApp(unittest.TestCase):
         :return:
         """
         user_id = 28057
-        group_id = self.api.createGroup("_test_userGroupList ", 'If this group exists some test failed - please delete')['id']
-        self.api.changeUserGroup(userId=user_id, groupId=group_id, add_user=True)
+        group_id = self.api.createGroup(
+            "_test_userGroupList ",
+            'If this group exists some test failed - please delete')['id']
+        self.api.changeUserGroup(
+            userId=user_id,
+            groupId=group_id,
+            add_user=True)
 
         result = self.api.getUserGroupList()
         self.assertGreater(len(result), 0)
@@ -177,7 +196,9 @@ class TestsCommuniApp(unittest.TestCase):
         :return:
         """
         user_id = 28057
-        group_id= self.api.createGroup("_test_changeUserGroup ", 'If this group exists some test failed - please delete')['id']
+        group_id = self.api.createGroup(
+            "_test_changeUserGroup ",
+            'If this group exists some test failed - please delete')['id']
 
         self.assertFalse(self.api.changeUserGroup(0, 0, False))
         self.assertTrue(self.api.changeUserGroup(user_id, group_id, True))
@@ -194,7 +215,6 @@ class TestsCommuniApp(unittest.TestCase):
         result = self.api.deleteGroup(id=group_id)
         self.assertTrue(result)
 
-
     def test_message(self):
         """
         Attempts to post a chat message text into a test group
@@ -202,7 +222,9 @@ class TestsCommuniApp(unittest.TestCase):
         groupID 21037 (_TEST Gruppe - UserAdd)
         :return:
         """
-        group_id= self.api.createGroup("_test_message ", 'If this group exists some test failed - please delete')['id']
+        group_id = self.api.createGroup(
+            "_test_message ",
+            'If this group exists some test failed - please delete')['id']
 
         timestamp = datetime.now()
         result = self.api.message(groupId=group_id,
@@ -220,7 +242,11 @@ class TestsCommuniApp(unittest.TestCase):
         :return:
         """
         test_event_ids = [2626]
-        result = create_event_chats(self.ct_api, self.api, test_event_ids, only_relevant=True)
+        result = create_event_chats(
+            self.ct_api,
+            self.api,
+            test_event_ids,
+            only_relevant=True)
         self.assertEqual(True, result)
 
         result = delete_event_chats(self.ct_api, self.api, test_event_ids)

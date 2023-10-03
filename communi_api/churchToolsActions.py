@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timedelta
-from CommuniApi.communiActions import get_create_or_delete_group, update_group_users_by_services
+from communi_api.communiActions import get_create_or_delete_group
+
 
 def generate_group_name_for_event(ct_api, eventId):
     """
@@ -19,7 +20,9 @@ def generate_group_name_for_event(ct_api, eventId):
 
     group_name = '_{} - {}'.format(datestring, event['name'])
 
-    logging.debug('Generated name ({}) for event {}'.format(group_name, eventId))
+    logging.debug(
+        'Generated name ({}) for event {}'.format(
+            group_name, eventId))
 
     return group_name
 
@@ -55,7 +58,8 @@ def generate_services_for_event(ct_api, eventId):
     event = ct_api.get_events(eventId=eventId, include='eventServices')[0]
     service_names = ct_api.get_services(returnAsDict=True)
 
-    serviceGroups = ct_api.get_event_masterdata(type='serviceGroups', returnAsDict=True)
+    serviceGroups = ct_api.get_event_masterdata(
+        type='serviceGroups', returnAsDict=True)
     eventServices = {item['name']: {} for item in serviceGroups.values()}
 
     for service in event['eventServices']:
@@ -66,7 +70,12 @@ def generate_services_for_event(ct_api, eventId):
             eventServices[service_group_name][service_name] = []
         if service['personId'] is not None:
             personFromCT = ct_api.get_persons(ids=[service['personId']])[0]
-            person = (personFromCT['email'], "{} {} {}".format('' if service['agreed'] else '?', personFromCT['firstName'], personFromCT['lastName']))
+            person = (
+                personFromCT['email'],
+                "{} {} {}".format(
+                    '' if service['agreed'] else '?',
+                    personFromCT['firstName'],
+                    personFromCT['lastName']))
             eventServices[service_group_name][service_name].append(person)
 
     logging.debug('generate_services_for_event')
@@ -74,7 +83,8 @@ def generate_services_for_event(ct_api, eventId):
     return eventServices
 
 
-def get_x_day_event_ids(ct_api, reference_day=datetime.today(), number_of_days=7):
+def get_x_day_event_ids(
+        ct_api, reference_day=datetime.today(), number_of_days=7):
     """
     Helper function that will get a list of event ids from CT based on reference day and number of days
     :param ct_api: link to ChurchTools
@@ -117,7 +127,8 @@ def delete_event_chats(ct_api, communi_api, event_ids):
 
     for event_id in event_ids:
         group_name = generate_group_name_for_event(ct_api, event_id)
-        result |= get_create_or_delete_group(communi_api, group_name, delete=True) is not None
+        result |= get_create_or_delete_group(
+            communi_api, group_name, delete=True) is not None
 
     return result
 
@@ -143,8 +154,84 @@ def create_event_chats(ct_api, communi_api, event_ids, only_relevant=True):
         relevant = are_services_relevant(services)
         if (relevant and only_relevant) or not only_relevant:
             group_name = generate_group_name_for_event(ct_api, event_id)
-            group_id = get_create_or_delete_group(communi_api, group_name, delete=False)
+            group_id = get_create_or_delete_group(
+                communi_api, group_name, delete=False)
             result |= group_id is not None
             update_group_users_by_services(communi_api, services, group_id)
 
     return result
+
+
+def update_group_users_by_services(communi_api, event_services, groupId):
+    """
+    :param communi_api: link to Communi
+    :type communi_api: CommuniApi.CommuniApi
+    :param event_services:
+    :type event_services: dict
+    :param groupId: Communi Group ID != CT Group or Event ID
+    :type groupId: int
+    :return:
+    """
+    timestamp = datetime.now().astimezone().strftime('%a %d.%m (%H:%M:%S)')
+
+    communi_users = communi_api.getUserList()
+    communi_users_ids = {item['mailadresse']: item['id']
+                         for item in communi_users}
+
+    user_group_list = [user['user']
+                       for user in communi_api.getUserGroupList(group=groupId)]
+    new_group = len(user_group_list) == 1
+    if new_group:
+        text = 'Erstbefüllung der Gruppe mit Diensten'
+    else:
+        text = 'Aktualisierung der Gruppe mit aktuellen Diensten'
+
+    communi_api.message(
+        groupId=groupId,
+        text='AUTOMATISCHE Nachricht {}\n'.format(timestamp) +
+        text)
+
+    for service_group_name, service_item in event_services.items():
+        if len(service_item) == 0:  # Skip if empty Service Group
+            continue
+        text = ''
+        for service_name, service_persons in service_item.items():
+            user_name_text = ''
+            for user in service_persons:
+                mail = user[0]
+                name = user[1]
+                logging.debug(
+                    'Trying to match {} of user {} for service {}'.format(
+                        mail, name, service_name))
+                if service_name in ['Begrüßung & Opferzählen', 'Opfer zählen']:
+                    logging.debug(
+                        'not adding User {} with mail {} because of service name'.format(
+                            name, mail))
+                    user_name_text += '\n• {} - (für Gruppe ausgelassen)'.format(name)
+                elif mail in communi_users_ids.keys():
+                    communi_user_id = communi_users_ids[mail]
+                    logging.debug('User {} found in communi'.format(mail))
+                    if new_group or (communi_user_id not in user_group_list):
+                        logging.debug(
+                            'User {} not found in group {}'.format(
+                                mail, groupId))
+                        user_name_text += '\n• {}'.format(name)
+                        communi_api.changeUserGroup(
+                            communi_user_id, groupId, True)
+                else:
+                    user_name_text += '\n• {} - FEHLT - (Mailadresse unbekannt)'.format(
+                        name)
+                    logging.debug(
+                        'User {} with mail {} NOT found in communi'.format(
+                            name, mail))
+            if len(user_name_text) > 1:
+                text += '\n' + service_name
+                text += user_name_text
+        if len(text) > 0:
+            text = '{}:'.format(service_group_name) + text
+            communi_api.message(groupId=groupId, text=text)
+
+    timestamp = datetime.now().astimezone().strftime('%a %d.%m (%H:%M:%S)')
+    communi_api.message(
+        groupId=groupId,
+        text='ENDE AUTOMATISCHE Nachricht  um {}'.format(timestamp))

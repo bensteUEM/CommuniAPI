@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "communi-api"
+version = "1.1.0"
+description = "A python wrapper for use with Communi API"
+authors = [
+    "bensteUEM",
+]
+homepage = "https://github.com/bensteUEM/CommuniAPI"
+license = "CC-BY-SA"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dependencies.churchtools-api]
+git = "https://github.com/bensteUEM/ChurchToolsAPI.git"
+rev = "1.5.1"
+
+[tool.poetry.group.dev.dependencies]
+poetry = "^1.6.1"
+tomli_w = "^1.0.0"
+wheel = "^0.41.2"
+setuptools = "^66.1.1"
+autopep8 = "^2.0.4"
+
+[build-system]
+requires = [
+    "poetry-core",
+]
+build-backend = "poetry.core.masonry.api"
