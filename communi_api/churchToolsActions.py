@@ -21,8 +21,8 @@ def generate_group_name_for_event(ct_api, eventId):
     group_name = '_{} - {}'.format(datestring, event['name'])
 
     logging.debug(
-        'Generated name ({}) for event {}'.format(
-            group_name, eventId))
+        'Generated name (%s) for event %s',
+        group_name, eventId)
 
     return group_name
 
@@ -72,10 +72,7 @@ def generate_services_for_event(ct_api, eventId):
             personFromCT = ct_api.get_persons(ids=[service['personId']])[0]
             person = (
                 personFromCT['email'],
-                "{} {} {}".format(
-                    '' if service['agreed'] else '?',
-                    personFromCT['firstName'],
-                    personFromCT['lastName']))
+                f"{'' if service['agreed'] else '?'} {personFromCT['firstName']} {personFromCT['lastName']}")
             eventServices[service_group_name][service_name].append(person)
 
     logging.debug('generate_services_for_event')
@@ -188,8 +185,7 @@ def update_group_users_by_services(communi_api, event_services, groupId):
 
     communi_api.message(
         groupId=groupId,
-        text='AUTOMATISCHE Nachricht {}\n'.format(timestamp) +
-        text)
+        text='AUTOMATISCHE Nachricht {timestamp}\n' + text)
 
     for service_group_name, service_item in event_services.items():
         if len(service_item) == 0:  # Skip if empty Service Group
@@ -201,37 +197,36 @@ def update_group_users_by_services(communi_api, event_services, groupId):
                 mail = user[0]
                 name = user[1]
                 logging.debug(
-                    'Trying to match {} of user {} for service {}'.format(
-                        mail, name, service_name))
+                    'Trying to match %s of user %s for service %s',
+                    mail, name, service_name)
                 if service_name in ['Begrüßung & Opferzählen', 'Opfer zählen']:
                     logging.debug(
-                        'not adding User {} with mail {} because of service name'.format(
-                            name, mail))
-                    user_name_text += '\n• {} - (für Gruppe ausgelassen)'.format(name)
+                        'not adding User %s with mail %s because of service name',
+                        name, mail)
+                    user_name_text += f'\n• {name} - (für Gruppe ausgelassen)'
                 elif mail in communi_users_ids.keys():
                     communi_user_id = communi_users_ids[mail]
-                    logging.debug('User {} found in communi'.format(mail))
+                    logging.debug('User %s found in communi', mail)
                     if new_group or (communi_user_id not in user_group_list):
                         logging.debug(
-                            'User {} not found in group {}'.format(
-                                mail, groupId))
-                        user_name_text += '\n• {}'.format(name)
+                            'User %s not found in group %s',
+                            mail, groupId)
+                        user_name_text += f'\n• {name}'
                         communi_api.changeUserGroup(
                             communi_user_id, groupId, True)
                 else:
-                    user_name_text += '\n• {} - FEHLT - (Mailadresse unbekannt)'.format(
-                        name)
+                    user_name_text += f'\n• {name} - FEHLT - (Mailadresse unbekannt)'
                     logging.debug(
-                        'User {} with mail {} NOT found in communi'.format(
-                            name, mail))
+                        'User %s with mail %s NOT found in communi',
+                        name, mail)
             if len(user_name_text) > 1:
                 text += '\n' + service_name
                 text += user_name_text
         if len(text) > 0:
-            text = '{}:'.format(service_group_name) + text
+            text = f'{service_group_name}:' + text
             communi_api.message(groupId=groupId, text=text)
 
     timestamp = datetime.now().astimezone().strftime('%a %d.%m (%H:%M:%S)')
     communi_api.message(
         groupId=groupId,
-        text='ENDE AUTOMATISCHE Nachricht  um {}'.format(timestamp))
+        text=f'ENDE AUTOMATISCHE Nachricht  um {timestamp}')

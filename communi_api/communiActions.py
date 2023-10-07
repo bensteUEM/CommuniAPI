@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 
 
 def get_create_or_delete_group(communi_api, group_name, delete=False):
@@ -19,8 +18,8 @@ def get_create_or_delete_group(communi_api, group_name, delete=False):
             if delete:
                 result = communi_api.deleteGroup(id=group['id'])
                 logging.debug(
-                    'Deleted group {} was succesful = {}'.format(
-                        group['id'], result))
+                    'Deleted group %s was succesful = %s',
+                    group['id'], result)
 
             return group['id']
 
@@ -36,4 +35,5 @@ def get_create_or_delete_group(communi_api, group_name, delete=False):
         return newGroup['id']
     else:
         logging.info(
-            "Group ({}) not found therefore not deleted".format(group_name))
+            "Group (%s) not found therefore not deleted",
+            group_name)

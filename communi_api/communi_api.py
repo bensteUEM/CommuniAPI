@@ -4,6 +4,7 @@ from datetime import datetime
 
 import requests
 
+
 class CommuniApi:
     """ CommuniAPI class which can be used for all actions with Communi
     """
@@ -35,8 +36,7 @@ class CommuniApi:
         Default print option for the class
         :return:
         """
-        text = "This is a Communi API instance connected to {} with CommuniApp {}".format(self.communi_server,
-                                                                                          self.communi_appid)
+        text = f"This is a Communi API instance connected to {self.communi_server} with CommuniApp {self.communi_appid}"
         return text
 
     def login(self):
@@ -45,24 +45,28 @@ class CommuniApi:
         :return:  either response content or False if unsucessful
         """
         url = self.communi_server + '/login'
-        self.session.headers['X-Authorization'] = 'Bearer ' + self.communi_token
+        self.session.headers['X-Authorization'] = 'Bearer ' + \
+            self.communi_token
 
         response = self.session.get(url=url)
         if response.status_code == 200:
             response_content = json.loads(response.content)
             self.user_id = response_content['id']
-            logging.debug("Login with user ID:{} - success".format(self.user_id))
+            logging.debug(
+                "Login with user ID:%s - success",
+                self.user_id)
 
             groups = self.getGroups()
             if groups:
                 return response_content
             else:
-                logging.warn(f'Login with App-ID:{self.communi_appid} did not return groups - either APP-ID wrong or empty app')
+                logging.warning(
+                    'Login with App-ID:%s did not return groups - either APP-ID wrong or empty app', self.communi_appid)
                 return False
         else:
-            if hasattr(self,'user_id'):
+            if hasattr(self, 'user_id'):
                 del self.user_id
-            logging.debug("Login failed with {}".format(response.content))
+            logging.debug("Login failed with %s", response.content)
             return False
 
     def who_am_i(self):
@@ -72,7 +76,7 @@ class CommuniApi:
         :return: dict of user OR bool False if not successful
         """
 
-        if not hasattr(self,'user_id'):
+        if not hasattr(self, 'user_id'):
             return False
         return self.getUserList(userId=self.user_id)
 
@@ -93,11 +97,13 @@ class CommuniApi:
         response = self.session.get(url=url, params=params)
         if response.status_code == 200:
             response_content = json.loads(response.content)
-            logging.debug("Fetched {} users successful".format(len(response_content)))
+            logging.debug(
+                "Fetched %s users successful", len(response_content))
             return response_content
         else:
             logging.debug(
-                "getUserList failed with code {} and message {}".format(response.status_code, response.content))
+                "getUserList failed with code %s and message %s",
+                response.status_code, response.content)
             return False
 
     def getUserGroupList(self, **kwargs):
@@ -125,16 +131,23 @@ class CommuniApi:
         if response.status_code == 200:
             response_content = json.loads(response.content)
             if len(response_content) == 0:
-                logging.debug("Response content empty - maybe group / user ID {}?".format(kwargs))
+                logging.debug(
+                    "Response content empty - maybe group / user ID %s?",
+                    kwargs)
                 return False
             else:
-                logging.debug("Found {} assignments - success".format(len(response_content)))
+                logging.debug(
+                    "Found %s assignments - success",
+                    len(response_content))
                 return response_content
         else:
-            logging.warning("Requesting group / user assignements failed with {}".format(response.content))
+            logging.warning(
+                "Requesting group / user assignements failed with %s",
+                response.content)
             return False
 
-    def createGroup(self, title="", description="", access_type_open=False, hasGroupChat=True):
+    def createGroup(self, title="", description="",
+                    access_type_open=False, hasGroupChat=True):
         """
         Method which creates a new group in Communi
         :param title: Name of the group
@@ -161,10 +174,14 @@ class CommuniApi:
                 logging.debug("Response content empty - likely failed?")
                 return False
             else:
-                logging.debug("Created group id {} - success".format(response_content['id']))
+                logging.debug(
+                    "Created group id %s - success",
+                    response_content['id'])
                 return response_content
         else:
-            logging.debug("Creating group failed with {}".format(response.content))
+            logging.debug(
+                "Creating group failed with %s",
+                response.content)
             return False
 
     def getGroups(self, **kwargs):
@@ -189,16 +206,24 @@ class CommuniApi:
         if response.status_code == 200:
             response_content = json.loads(response.content)
             if len(response_content) == 0:
-                logging.debug("Response content empty - maybe group does not exist? {}?".format(kwargs))
+                logging.debug(
+                    "Response content empty - maybe group does not exist? %s?",
+                    kwargs)
                 return False
             else:
-                logging.debug("Found {} groups - success".format(len(response_content)))
+                logging.debug(
+                    "Found %s groups - success",
+                    len(response_content))
 
                 if 'name' in kwargs.keys():
-                    response_content = [item for item in response_content if item['title'] == kwargs['name']]
-                return response_content[0] if len(response_content) == 1 else response_content
+                    response_content = [
+                        item for item in response_content if item['title'] == kwargs['name']]
+                return response_content[0] if len(
+                    response_content) == 1 else response_content
         else:
-            logging.debug("Requesting group failed with {}".format(response.content))
+            logging.debug(
+                "Requesting group failed with %s",
+                response.content)
             return False
 
     def deleteGroup(self, **kwargs):
@@ -210,9 +235,12 @@ class CommuniApi:
         by_name = 'name' in kwargs.keys()
 
         if not (by_name or 'id' in kwargs.keys()) and len(kwargs.keys() == 1):
-            logging.warning('Problem with keywords {} in deleteGroupd'.format(kwargs))
+            logging.warning(
+                'Problem with keywords %s in deleteGroupd',
+                kwargs)
         else:
-            id = kwargs['id'] if 'id' in kwargs.keys() else self.getGroups(name=kwargs['name'])['id']
+            id = kwargs['id'] if 'id' in kwargs.keys()\
+                else self.getGroups(name=kwargs['name'])['id']
 
         url = self.communi_server + '/group/' + str(id)
 
@@ -221,10 +249,11 @@ class CommuniApi:
         if response.status_code == 200:
             response_content = json.loads(response.content)
             if len(response_content) == 0:
-                logging.debug("Deleted group{}?".format(id))
+                logging.debug("Deleted group%s?", id)
                 return True
         else:
-            logging.debug("Deleting group failed with {}".format(response.content))
+            logging.debug(
+                "Deleting group failed with %s", response.content)
             return False
 
     def changeUserGroup(self, userId, groupId, add_user=True):
@@ -238,7 +267,7 @@ class CommuniApi:
         :return: ???
         """
 
-        url = self.communi_server + '/UserGroup/{}-{}'.format(userId, groupId)
+        url = self.communi_server + f'/UserGroup/{userId}-{groupId}'
 
         data = {
             "roleId": 40,
@@ -246,7 +275,7 @@ class CommuniApi:
             "status": 2 if add_user else 4,
             "user": userId,
             "group": groupId,
-            "id": "{}-{}".format(userId, groupId),
+            "id": f"{userId}-{groupId}",
             "_rls": 1,
             "_loadStatus": 10,
             "valid": True
@@ -258,7 +287,9 @@ class CommuniApi:
             response_content = json.loads(response.content)
             if 'error' not in response_content.keys():
                 if 'valid' in response_content.keys():
-                    logging.debug("Changed permissions of user {} on group {}?".format(userId, groupId))
+                    logging.debug(
+                        "Changed permissions of user %s on group %s?",
+                        userId, groupId)
                     return response_content['valid']
                 else:
                     return False
@@ -266,7 +297,8 @@ class CommuniApi:
                 return False
         else:
             logging.debug(
-                "Changing assignment on user {} with group {} failed with {}".format(userId, groupId, response.content))
+                "Changing assignment on user %s with group %s failed with %s",
+                userId, groupId, response.content)
             return False
 
     def message(self, groupId, text):
@@ -281,7 +313,7 @@ class CommuniApi:
 
         data = {
             "message": text,
-            "conversation": "group-{}".format(groupId)
+            "conversation": f"group-{groupId}"
         }
 
         response = self.session.post(url, json=data)
@@ -290,13 +322,13 @@ class CommuniApi:
             response_content = json.loads(response.content)
             if 'error' not in response_content.keys():
                 if 'valid' in response_content.keys():
-                    logging.debug("Posted message {}".format(data))
+                    logging.debug("Posted message %s", data)
                     return response_content['valid']
                 else:
                     return False
             else:
                 return False
         else:
-            logging.debug(
-                "Posting message {} failed with {}".format(data, response.content))
+            logging.debug("Posting message %s failed with %s",
+                          data, response.content)
             return False
