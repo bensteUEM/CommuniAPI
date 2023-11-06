@@ -185,7 +185,7 @@ def update_group_users_by_services(communi_api, event_services, groupId):
 
     communi_api.message(
         groupId=groupId,
-        text='AUTOMATISCHE Nachricht {timestamp}\n' + text)
+        text=f'AUTOMATISCHE Nachricht {timestamp}\n' + text)
 
     for service_group_name, service_item in event_services.items():
         if len(service_item) == 0:  # Skip if empty Service Group
