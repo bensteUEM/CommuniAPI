@@ -20,7 +20,7 @@ pyproject_toml_content = {
             "readme": "README.md",
             "dependencies": {
                 "python": "^3.8",
-                "churchtools-api": {"git": "https://github.com/bensteUEM/ChurchToolsAPI.git", "rev": "1.5.1"}
+                "churchtools-api": {"git": "https://github.com/bensteUEM/ChurchToolsAPI.git", "rev": "master"}
             },
             "group": {
                 "dev": {
