@@ -9,6 +9,8 @@ If you only downloaded this code without package management you will need to ins
 
 Check https://github.com/bensteUEM/ChurchToolsAPI/releases for the latest realease.
 
+Config Params required by ChurchTools might be required too - check respective documentation!
+
 ### How to use with config.py
 By default some changes need to be made to config.py before first use.
 (if you want to use it as config params)
