@@ -3,7 +3,7 @@ import logging
 import logging.config
 import os
 import unittest
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from churchtools_api.churchtools_api import ChurchToolsApi
@@ -223,16 +223,14 @@ class TestsCommuniApp(unittest.TestCase):
     def test_message(self) -> None:
         """Check message API.
 
-        Attempts to post a chat message text into a test group
-        IMPORTANT - This test method and the parameters used depend on the target system!
-        groupID 21037 (_TEST Gruppe - UserAdd)
-        :return:
+        Attempts to post a chat message text into a new test group
+        and deletes it afterwards.
         """
         group_id = self.api.createGroup(
             "_test_message ", "If this group exists some test failed - please delete"
         )["id"]
 
-        timestamp = datetime.now()
+        timestamp = datetime.now(tz=timezone.utc)
         result = self.api.message(
             groupId=group_id, text=f"Hello World from test_postInGroup - on {timestamp}"
         )
@@ -257,3 +255,28 @@ class TestsCommuniApp(unittest.TestCase):
 
         result = delete_event_chats(self.ct_api, self.api, test_event_ids)
         assert True is result
+
+    def test_recommendation(self) -> None:
+        """Check recommendation API.
+
+        Attempts to post a recommendation into a new test group
+        and deletes it afterwards.
+        """
+        group_id = self.api.createGroup(
+            "_test_recommendation ",
+            "If this group exists some test failed - please delete",
+        )["id"]
+
+        timestamp = datetime.now(tz=timezone.utc)
+        result = self.api.recommendation(
+            group_id=group_id,
+            title="test_title",
+            description="test description",
+            post_date=timestamp,
+            pic_url="",
+            is_official=False,
+        )
+        assert result
+
+        result = self.api.deleteGroup(id=group_id)
+        assert result

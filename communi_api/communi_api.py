@@ -16,6 +16,7 @@ with config_file.open(encoding="utf-8") as f_in:
         log_directory.mkdir(parents=True)
     logging.config.dictConfig(config=logging_config)
 
+
 class CommuniApi:
     """CommuniAPI class which can be used for all actions with Communi"""
 
@@ -50,7 +51,7 @@ class CommuniApi:
         self.session.headers["X-Authorization"] = "Bearer " + self.communi_token
 
         response = self.session.get(url=url)
-        if response.status_code == 200:
+        if response.status_code == requests.codes.ok:
             response_content = json.loads(response.content)
             self.user_id = response_content["id"]
             logger.debug("Login with user ID:%s - success", self.user_id)
@@ -90,7 +91,7 @@ class CommuniApi:
             params["id"] = kwargs["userId"]
 
         response = self.session.get(url=url, params=params)
-        if response.status_code == 200:
+        if response.status_code == requests.codes.ok:
             response_content = json.loads(response.content)
             logger.debug("Fetched %s users successful", len(response_content))
             return response_content
@@ -118,7 +119,7 @@ class CommuniApi:
 
         response = self.session.get(url=url, params=params)
 
-        if response.status_code == 200:
+        if response.status_code == requests.codes.ok:
             response_content = json.loads(response.content)
             if len(response_content) == 0:
                 logger.debug(
@@ -154,7 +155,7 @@ class CommuniApi:
 
         response = self.session.post(url=url, json=data)
 
-        if response.status_code == 200:
+        if response.status_code == requests.codes.ok:
             response_content = json.loads(response.content)
             if len(response_content) == 0:
                 logger.debug("Response content empty - likely failed?")
@@ -178,7 +179,7 @@ class CommuniApi:
 
         response = self.session.get(url=url, params=params)
 
-        if response.status_code == 200:
+        if response.status_code == requests.codes.ok:
             response_content = json.loads(response.content)
             if len(response_content) == 0:
                 logger.debug(
@@ -217,7 +218,7 @@ class CommuniApi:
 
         response = self.session.delete(url)
 
-        if response.status_code == 200:
+        if response.status_code == requests.codes.ok:
             response_content = json.loads(response.content)
             if len(response_content) == 0:
                 logger.debug("Deleted group%s?", id)
@@ -251,7 +252,7 @@ class CommuniApi:
 
         response = self.session.put(url, json=data)
 
-        if response.status_code == 200:
+        if response.status_code == requests.codes.ok:
             response_content = json.loads(response.content)
             if "error" not in response_content.keys():
                 if "valid" in response_content.keys():
@@ -281,7 +282,7 @@ class CommuniApi:
 
         response = self.session.post(url, json=data)
 
-        if response.status_code == 200:
+        if response.status_code == requests.codes.ok:
             response_content = json.loads(response.content)
             if "error" not in response_content.keys():
                 if "valid" in response_content.keys():
@@ -292,3 +293,47 @@ class CommuniApi:
         logger.debug("Posting message %s failed with %s", data, response.content)
         return False
 
+    def recommendation(  # noqa: PLR0913
+        self,
+        group_id: int,
+        title: str,
+        description: str,
+        post_date: datetime,
+        pic_url: str = "",
+        is_official: bool = False,  # noqa: FBT001, FBT002
+    ) -> bool:
+        """Post a new recommendation into a group.
+
+        Args:
+            group_id: number of the group to post in
+            title: title to be used
+            description: text body used
+            post_date: ? likely manual date of post
+            pic_url: optional url to picture to be shown
+            is_official: if posted as user or official. Defaults to False.
+
+        Returns:
+            if successful
+        """
+        url = self.communi_server + "/recommendation"
+
+        data = {
+            "title": title,
+            "dateTime": post_date.strftime("%Y-%m-%d %H:%M:%S %z").replace(
+                "+0000", "+0"
+            ),
+            "description": description,
+            "picUrl": pic_url,
+            "group": f"{group_id}",
+            "isOfficial": is_official,
+        }
+
+        response = self.session.post(url, json=data)
+
+        if response.status_code == requests.codes.ok:
+            response_content = json.loads(response.content)
+            if "error" not in response_content and "valid" in response_content:
+                logger.debug("Posted message %s", data)
+                return response_content["valid"]
+        logger.debug("Posting message %s failed with %s", data, response.content)
+        return False

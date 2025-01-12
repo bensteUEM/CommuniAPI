@@ -20,7 +20,7 @@ pyproject_toml_content = {
             "license": "CC-BY-SA",
             "readme": "README.md",
             "dependencies": {
-                "python": "^3.8",
+                "python": "^3.10",
                 "churchtools-api": {
                     "git": "https://github.com/bensteUEM/ChurchToolsAPI.git",
                     "rev": "master",

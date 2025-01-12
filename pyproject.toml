@@ -10,7 +10,7 @@ license = "CC-BY-SA"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 
 [tool.poetry.dependencies.churchtools-api]
 git = "https://github.com/bensteUEM/ChurchToolsAPI.git"
