@@ -300,6 +300,7 @@ class CommuniApi:
         description: str,
         post_date: datetime,
         pic_url: str = "",
+        link: str = "",
         is_official: bool = False,  # noqa: FBT001, FBT002
     ) -> bool:
         """Post a new recommendation into a group.
@@ -310,6 +311,7 @@ class CommuniApi:
             description: text body used
             post_date: ? likely manual date of post
             pic_url: optional url to picture to be shown
+            link: recommendation URL
             is_official: if posted as user or official. Defaults to False.
 
         Returns:
@@ -324,6 +326,7 @@ class CommuniApi:
             ),
             "description": description,
             "picUrl": pic_url,
+            "link": link,
             "group": f"{group_id}",
             "isOfficial": is_official,
         }

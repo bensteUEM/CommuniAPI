@@ -274,6 +274,7 @@ class TestsCommuniApp(unittest.TestCase):
             description="test description",
             post_date=timestamp,
             pic_url="",
+            link="https://github.com/bensteUEM/CommuniAPI/",
             is_official=False,
         )
         assert result
