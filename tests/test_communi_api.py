@@ -22,8 +22,9 @@ with config_file.open(encoding="utf-8") as f_in:
     logging.config.dictConfig(config=logging_config)
 
 
-class TestsCommuniApp(unittest.TestCase):
+class TestsCommuniApp():
     def setup_class(self) -> None:
+        """Common setup with testing provides api connections."""
         if "COMMUNI_TOKEN" in os.environ:
             self.COMMUNI_TOKEN = os.environ["COMMUNI_TOKEN"]
             self.COMMUNI_SERVER = os.environ["COMMUNI_SERVER"]
@@ -52,6 +53,7 @@ class TestsCommuniApp(unittest.TestCase):
     def tearDown(self) -> None:
         """Destroy the session after test execution to avoid resource issues."""
         self.api.session.close()
+        logger.debug("Finished Tests RUN")
 
     def test_config(self) -> None:
         """Check that configuration exists."""

@@ -1,6 +1,6 @@
 import os
 
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 __version__ = VERSION
 
 if __name__ == "__main__":

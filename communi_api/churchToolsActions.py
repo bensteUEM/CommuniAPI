@@ -66,7 +66,7 @@ def generate_services_for_event(ct_api, eventId):
     event = ct_api.get_events(eventId=eventId, include="eventServices")[0]
     service_names = ct_api.get_services(returnAsDict=True)
 
-    serviceGroups = ct_api.get_event_masterdata(type="serviceGroups", returnAsDict=True)
+    serviceGroups = ct_api.get_event_masterdata(resultClass="serviceGroups", returnAsDict=True)
     eventServices = {item["name"]: {} for item in serviceGroups.values()}
 
     for service in event["eventServices"]:
