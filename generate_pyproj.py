@@ -23,7 +23,7 @@ pyproject_toml_content = {
                 "python": "^3.10",
                 "churchtools-api": {
                     "git": "https://github.com/bensteUEM/ChurchToolsAPI.git",
-                    "rev": "master",
+                    "rev": "main",
                 },
             },
             "group": {
@@ -36,6 +36,7 @@ pyproject_toml_content = {
                         "autopep8": "^2.0.4",
                         "pytest": "^8.3.4",
                         "ruff": "^0.9.1",
+                        "ipykernel": "^6.29.5",
                     }
                 }
             },

@@ -14,7 +14,7 @@ python = "^3.10"
 
 [tool.poetry.dependencies.churchtools-api]
 git = "https://github.com/bensteUEM/ChurchToolsAPI.git"
-rev = "master"
+rev = "main"
 
 [tool.poetry.group.dev.dependencies]
 poetry = "^1.6.1"
@@ -24,6 +24,7 @@ setuptools = "^66.1.1"
 autopep8 = "^2.0.4"
 pytest = "^8.3.4"
 ruff = "^0.9.1"
+ipykernel = "^6.29.5"
 
 [tool.ruff]
 exclude = [
