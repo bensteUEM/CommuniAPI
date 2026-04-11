@@ -134,6 +134,22 @@ class TestsCommuniApp:
         result = self.api.get_user_list(userId=user_id)
         assert "id" in result
 
+    def test_get_user(self) -> None:
+        """Check get_user API.
+
+        IMPORTANT - This test method and the parameters used
+            depend on the target system!
+        user_id = 28057 => Admin
+        """
+        user_id = 28057
+
+        result = self.api.get_user(user_id)
+        assert isinstance(result, dict)
+        assert result.get("id") == user_id
+        assert result.get("firstName")
+        assert result.get("lastName")
+        assert result.get("mailadresse")
+
     def test_get_groups(self) -> None:
         """Check getGroups API.
 

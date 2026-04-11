@@ -129,6 +129,88 @@ class CommuniApi:
         )
         return False
 
+    def get_user(self, user_id: int) -> dict | bool:
+        """Request a single user by ID.
+
+        Arguments: user_id: ID of the user to be requested
+        Returns: dict of user information or False if not successful.
+        """
+        url = self.communi_server + f"/user/{user_id}"
+        params = {"communiApp": self.communi_appid, "loadStatus": 1}
+
+        response = self.session.get(url=url, params=params)
+        if response.status_code == requests.codes.ok:
+            response_content = json.loads(response.content)
+            if isinstance(response_content, dict) and response_content:
+                logger.debug("Fetched user %s successful", user_id)
+                return response_content
+            logger.warning("User %s response empty or invalid", user_id)
+            return False
+        logger.debug(
+            "get_user failed with code %s and message %s",
+            response.status_code,
+            response.content,
+        )
+        return False
+
+    def update_user(self, user_id: int, data: dict) -> dict | bool:
+        """Update a user via PUT using the Communi User API.
+
+        Following API documentation only own user can be updated!
+
+        Arguments:
+            user_id: ID of the user to be updated
+            data: dict with user information to be updated.
+            Must include all required fields.
+
+        Returns:
+            dict of updated user information or False if not successful.
+        """
+        url = self.communi_server + f"/user/{user_id}"
+
+        payload = dict(data)
+        payload["id"] = user_id
+        payload["communiApp"] = self.communi_appid
+
+        response = self.session.put(url=url, json=payload)
+        if response.status_code == requests.codes.ok:
+            response_content = json.loads(response.content)
+            if isinstance(response_content, dict) and response_content:
+                logger.debug("Updated user %s successful", user_id)
+                return response_content
+            logger.warning(
+                "Update of user %s returned empty or invalid response",
+                user_id,
+            )
+            return False
+        logger.debug(
+            "update_user failed with code %s and message %s",
+            response.status_code,
+            response.content,
+        )
+        return False
+
+    def delete_user(self, user_id: int) -> bool:
+        """Delete a user by ID.
+
+        No test implemented because no create method exists in API
+
+        Arguments:
+            user_id: ID of the user to be deleted
+        Returns:
+            True if deletion successful, False otherwise.
+        """
+        url = self.communi_server + f"/user/{user_id}"
+
+        response = self.session.delete(url)
+        if response.status_code == requests.codes.ok:
+            response_content = json.loads(response.content)
+            if len(response_content) == 0:
+                logger.debug("Deleted user %s successful", user_id)
+                return True
+        logger.debug("Deleting user %s failed with %s", user_id, response.content)
+        return False
+
     def get_user_group_list(self, **kwargs: int) -> list | bool:
         """Get a list of UserGroup allocations matching.
 
@@ -173,7 +255,7 @@ class CommuniApi:
         description: str = "",
         access_type_open: bool = False,  # noqa: FBT001, FBT002
         has_goup_chat: bool = True,  # noqa: FBT001, FBT002
-    )-> dict | bool:
+    ) -> dict | bool:
         """Method which creates a new group in Communi.
 
         Arguments:
