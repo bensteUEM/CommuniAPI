@@ -10,6 +10,7 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 
+import pytest
 from churchtools_api.churchtools_api import ChurchToolsApi
 
 from communi_api.churchToolsActions import create_event_chats, delete_event_chats
@@ -273,6 +274,9 @@ class TestsCommuniApp:
         result = self.api.delete_group(id=group_id)
         assert result
 
+    @pytest.mark.skip(
+        reason="Depends on CT system and was not tested with more recent versions"
+    )
     def test_create_event_chats(self) -> None:
         """Check create_event_chat functions.
 
