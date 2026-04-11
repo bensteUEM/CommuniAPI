@@ -17,10 +17,10 @@ pyproject_toml_content = {
             "description": "A python wrapper for use with Communi API",
             "authors": ["bensteUEM"],
             "homepage": "https://github.com/bensteUEM/CommuniAPI",
-            "license": "CC-BY-SA",
+            "license": "CC-BY-SA-2.0",
             "readme": "README.md",
             "dependencies": {
-                "python": "^3.10",
+                "python": "^3.11",
                 "churchtools-api": {
                     "git": "https://github.com/bensteUEM/ChurchToolsAPI.git",
                     "rev": "main",
@@ -29,13 +29,13 @@ pyproject_toml_content = {
             "group": {
                 "dev": {
                     "dependencies": {
-                        "poetry": "^1.6.1",
+                        "poetry": "^2.3.3",
                         "tomli_w": "^1.0.0",
-                        "wheel": "^0.41.2",
-                        "setuptools": "^66.1.1",
+                        "wheel": "^0.46.3",
+                        "setuptools": "^82.0.1",
                         "autopep8": "^2.0.4",
                         "pytest": "^8.3.4",
-                        "ruff": "^0.9.1",
+                        "ruff": "^0.15.5",
                         "ipykernel": "^6.29.5",
                     }
                 }
