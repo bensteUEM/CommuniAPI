@@ -1,8 +1,12 @@
+"""This file contains tests for the CommuniAPI class.
+
+It uses pytest as testing framework.
+"""
+
 import json
 import logging
 import logging.config
 import os
-import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -22,7 +26,9 @@ with config_file.open(encoding="utf-8") as f_in:
     logging.config.dictConfig(config=logging_config)
 
 
-class TestsCommuniApp():
+class TestsCommuniApp:
+    """TestClass for CommuniAPI."""
+
     def setup_class(self) -> None:
         """Common setup with testing provides api connections."""
         if "COMMUNI_TOKEN" in os.environ:
@@ -33,12 +39,12 @@ class TestsCommuniApp():
             self.CT_DOMAIN = os.environ["CT_DOMAIN"]
             logger.info("using connection details provided with ENV variables")
         else:
-            from secure.config import communiAppId, rest_server, token
+            from secure.config import communiAppId, rest_server, token  # noqa: PLC0415
 
             self.COMMUNI_TOKEN = token
             self.COMMUNI_SERVER = rest_server
             self.COMMUNI_APPID = communiAppId
-            from secure.config import ct_domain, ct_token
+            from secure.config import ct_domain, ct_token  # noqa: PLC0415
 
             self.CT_TOKEN = ct_token
             self.CT_DOMAIN = ct_domain
@@ -60,10 +66,10 @@ class TestsCommuniApp():
         assert self.api.communi_appid != 0, (
             "Please configure a propper App ID in config.py"
         )
-        assert self.api.communi_token != "ENTER-YOUR-TOKEN-HERE", (
+        assert self.api.communi_token != "ENTER-YOUR-TOKEN-HERE", (  # noqa: S105
             "Please change the default token in config.py"
         )
-        assert self.api.communi_server == "https://api.communiapp.de/rest", (
+        assert self.api.communi_server == "https://api.communiapp.de/rest/", (
             "Are you sure your server is correct?"
         )
 
@@ -76,14 +82,14 @@ class TestsCommuniApp():
 
     def test_login_wrong_app(self) -> None:
         """Check incorrect logins."""
-        temp_COMMUNI_APPID = self.api.communi_appid
+        temp_communi_appid = self.api.communi_appid
         self.api.communi_appid = 9999
         if self.api.session is not None:
             self.api.session.close()
         result = self.api.login()
         assert not result
 
-        self.api.communi_appid = temp_COMMUNI_APPID
+        self.api.communi_appid = temp_communi_appid
         if self.api.session is not None:
             self.api.session.close()
         result = self.api.login()
@@ -113,113 +119,122 @@ class TestsCommuniApp():
         assert result.get("lastName")
         assert result.get("mailadresse")
 
-    def test_getUserList(self) -> None:
+    def test_get_user_list(self) -> None:
         """Check getUserList API.
 
-        IMPORTANT - This test method and the parameters used depend on the target system!
-        userId = 28057 => Admin
+        IMPORTANT - This test method and the parameters used
+            depend on the target system!
+        user_id = 28057 => Admin
         """
-        userId = 28057
+        user_id = 28057
 
-        result = self.api.getUserList()
+        result = self.api.get_user_list()
         assert len(result) > 0
 
-        result = self.api.getUserList(userId=userId)
+        result = self.api.get_user_list(userId=user_id)
         assert "id" in result
 
-    def test_getGroups(self) -> None:
+    def test_get_groups(self) -> None:
         """Check getGroups API.
 
-        IMPORTANT - This test method and the parameters used depend on the target system!
+        IMPORTANT - This test method and the parameters used
+            depend on the target system!
         """
-        result = self.api.getGroups()
+        result = self.api.get_groups()
         assert len(result) > 0
 
-        result = self.api.getGroups(id=7525)["title"]
+        result = self.api.get_groups(id=7525)["title"]
         test_title = "Evang. Kirche Baiersbronn"
         assert result == test_title
 
-        result = self.api.getGroups(name="Admins und Moderatoren")["id"]
-        test_id = 7676
+        result = self.api.get_groups(name="APITest")["id"]
+        test_id = 89686
         assert result == test_id
 
-    def test_createDeleteGroup(self) -> None:
+    def test_create_delete_group(self) -> None:
         """Check create/delete Group APIs.
 
         Test that creates two new groups and deletes them one by id and one by name
-        IMPORTANT - This test method and the parameters used depend on the target system!
+        IMPORTANT - This test method and the parameters used
+            depend on the target system!
         :return:
         """
         description = (
-            "created by test_deleteGroup() function should be auto deleted after successful test\n"
+            "created by test_deleteGroup() function should be"
+            " auto deleted after successful test\n"
             "feel free to delete this group manually if it still exists"
         )
-        group1 = self.api.createGroup("Test1", description)
-        group2 = self.api.createGroup("Test2", description)
-        group2 = self.api.getGroups(id=group2["id"])
+        group1 = self.api.create_group("Test1", description)
+        group2 = self.api.create_group("Test2", description)
+        group2 = self.api.get_groups(id=group2["id"])
 
-        result = self.api.deleteGroup(id=group1["id"])
+        result = self.api.delete_group(id=group1["id"])
         assert result
 
-        result2 = self.api.deleteGroup(name=group2["title"])
+        result2 = self.api.delete_group(name=group2["title"])
         assert result2
 
-    def test_userGroupList(self) -> None:
+    def test_user_group_list(self) -> None:
         """Check userGroupList.
 
-        IMPORTANT - This test method and the parameters used depend on the target system!
+        IMPORTANT - This test method and the parameters used
+            depend on the target system!
         :return:
         """
         user_id = 28057
-        group_id = self.api.createGroup(
+        group_id = self.api.create_group(
             "_test_userGroupList ",
             "If this group exists some test failed - please delete",
         )["id"]
-        self.api.changeUserGroup(userId=user_id, groupId=group_id, add_user=True)
+        self.api.change_user_group(user_id=user_id, group_id=group_id, add_user=True)
 
-        result = self.api.getUserGroupList()
+        result = self.api.get_user_group_list()
         assert len(result) > 0
 
-        result = self.api.getUserGroupList(user=user_id)
+        result = self.api.get_user_group_list(user=user_id)
         assert len(result) > 1
 
-        result = self.api.getUserGroupList(group=group_id)
+        result = self.api.get_user_group_list(group=group_id)
         assert len(result) > 1
 
-        result = self.api.getUserGroupList(group=group_id, user=user_id)
+        result = self.api.get_user_group_list(group=group_id, user=user_id)
         assert len(result) == 1
         assert result[0]["user"] == user_id
         assert result[0]["group"] == group_id
 
-        result = self.api.deleteGroup(id=group_id)
+        result = self.api.delete_group(id=group_id)
         assert result
 
-    def test_changeUserGroup(self) -> None:
-        """Check changeUserGroup API.
+    def test_change_user_group(self) -> None:
+        """Check change_user_group API.
 
         Tries to add and remove a user from a test group
-        IMPORTANT - This test method and the parameters used depend on the target system!
+        IMPORTANT - This test method and the parameters used
+            depend on the target system!
         Testing with userID 28057 (admin)  and groupID 21037 (_TEST Gruppe - UserAdd)
         """
         user_id = 28057
-        group_id = self.api.createGroup(
+        group_id = self.api.create_group(
             "_test_changeUserGroup ",
             "If this group exists some test failed - please delete",
         )["id"]
 
-        assert not self.api.changeUserGroup(0, 0, add_user=False)
-        assert self.api.changeUserGroup(user_id, group_id, add_user=True)
+        assert not self.api.change_user_group(0, 0, add_user=False)
+        assert self.api.change_user_group(user_id, group_id, add_user=True)
 
-        test_result = self.api.getUserGroupList(user=user_id, group=group_id)
+        test_result = self.api.get_user_group_list(user=user_id, group=group_id)
         assert len(test_result) == 1
-        assert test_result[0]["status"] == 2
+        # status 2 means user is in group, status 4 means user is not in group
+        EXPECTED_STATUS = 2  # noqa: N806
+        assert test_result[0]["status"] == EXPECTED_STATUS
 
-        assert not self.api.changeUserGroup(0, 0, add_user=False)
-        assert self.api.changeUserGroup(user_id, group_id, add_user=False)
-        test_result = self.api.getUserGroupList(user=user_id, group=group_id)
-        assert test_result[0]["status"] == 4
+        assert not self.api.change_user_group(0, 0, add_user=False)
+        assert self.api.change_user_group(user_id, group_id, add_user=False)
+        test_result = self.api.get_user_group_list(user=user_id, group=group_id)
+        EXPECTED_STATUS = 4  # noqa: N806
+        assert test_result[0]["status"] == EXPECTED_STATUS
 
-        result = self.api.deleteGroup(id=group_id)
+        result = self.api.delete_group(id=group_id)
         assert result
 
     def test_message(self) -> None:
@@ -228,25 +243,28 @@ class TestsCommuniApp():
         Attempts to post a chat message text into a new test group
         and deletes it afterwards.
         """
-        group_id = self.api.createGroup(
+        group_id = self.api.create_group(
             "_test_message ", "If this group exists some test failed - please delete"
         )["id"]
 
         timestamp = datetime.now(tz=timezone.utc)
         result = self.api.message(
-            groupId=group_id, text=f"Hello World from test_postInGroup - on {timestamp}"
+            group_id=group_id,
+            text=f"Hello World from test_postInGroup - on {timestamp}",
         )
         assert result
 
-        result = self.api.deleteGroup(id=group_id)
+        result = self.api.delete_group(id=group_id)
         assert result
 
     def test_create_event_chats(self) -> None:
         """Check create_event_chat functions.
 
         Testing method to check if event creation and user update works
-        IMPORTANT - This test method and the parameters used depend on the target system!
-        event ID 2626 on elkw1610.krz.tools represents a rest event with multiple services
+        IMPORTANT - This test method and the parameters used
+            depend on the target system!
+        event ID 2626 on elkw1610.krz.tools
+        represents a rest event with multiple services
         :return:
         """
         test_event_ids = [2626]
@@ -264,7 +282,7 @@ class TestsCommuniApp():
         Attempts to post a recommendation into a new test group
         and deletes it afterwards.
         """
-        group_id = self.api.createGroup(
+        group_id = self.api.create_group(
             "_test_recommendation ",
             "If this group exists some test failed - please delete",
         )["id"]
@@ -281,5 +299,5 @@ class TestsCommuniApp():
         )
         assert result
 
-        result = self.api.deleteGroup(id=group_id)
+        result = self.api.delete_group(id=group_id)
         assert result
